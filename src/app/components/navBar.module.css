@@ -1,0 +1,160 @@
+.navBar {
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  height: 100vh;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.navHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 24px;
+  flex-shrink: 0;
+}
+
+.logoBadge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "JetBrains Mono", monospace;
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.1px;
+}
+
+.navContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.navList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.navItem:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.navItem:hover .navIcon {
+  color: var(--text-primary);
+}
+
+.navItemActive {
+  background-color: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.navItemActive .navIcon {
+  color: var(--accent);
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.navIcon svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  fill: currentColor;
+}
+
+.navLabel {
+  flex: 1;
+}
+
+.navBadge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.navFooter {
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 8px 4px;
+  border-top: 1px solid var(--border);
+}
+
+.userAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--text-muted) 100%);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.userStatus {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: "JetBrains Mono", monospace;
+}
