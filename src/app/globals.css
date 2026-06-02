@@ -1,4 +1,10 @@
-
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
 
 /* Global Colors */
 :root {
@@ -17,12 +23,25 @@
 }
 
 
-root,html, body {
-  font-family: 'Inter', sans-serif;
+html,
+body {
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   background-color: var(--bg);
   color: var(--text-primary);
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  display: flex;
   height: 100vh;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
