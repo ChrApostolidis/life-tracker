@@ -1,0 +1,27 @@
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px -10px rgba(107, 155, 209, 0.55);
+  z-index: 100;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.fab:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.fab:active {
+  transform: scale(0.97);
+}
