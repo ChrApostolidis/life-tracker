@@ -11,9 +11,9 @@ jobs:
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.DEPLOY_HOST || secrets.SERVER_IP || secrets.HOST }}
-          username: ${{ secrets.DEPLOY_USERNAME || secrets.SERVER_USER || secrets.USERNAME }}
-          key: ${{ secrets.DEPLOY_SSH_KEY || secrets.SSH_KEY || secrets.KEY }}
+          host: ${{ secrets.DEPLOY_HOST || secrets.SERVER_IP }}
+          username: ${{ secrets.DEPLOY_USERNAME || secrets.SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY || secrets.SSH_KEY }}
           script: |
             cd ~/life-tracker/life-tracker-app
             git pull
