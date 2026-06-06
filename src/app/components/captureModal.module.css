@@ -1,0 +1,144 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Title input ── */
+.titleInput {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  outline: none;
+  transition: box-shadow 120ms ease;
+}
+
+.titleInput::placeholder {
+  color: var(--text-muted);
+}
+
+.titleInput:focus {
+  box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.10);
+}
+
+/* ── Date / Time grid ── */
+.dateTimeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── Generic field ── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.fieldInput,
+.fieldTextarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 120ms ease;
+  width: 100%;
+}
+
+.fieldInput:focus,
+.fieldTextarea:focus {
+  border-color: var(--accent);
+}
+
+.fieldInput::placeholder,
+.fieldTextarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Override date/time picker chrome */
+.fieldInput::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+  cursor: pointer;
+}
+
+.fieldTextarea {
+  resize: vertical;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.micBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.micBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.saveGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.enterChip {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.saveBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.saveBtn:hover {
+  opacity: 0.88;
+}
