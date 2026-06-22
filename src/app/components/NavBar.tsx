@@ -22,7 +22,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: "Today", href: "/today", icon: faCalendarDay },
+  { label: "Today", href: "/", icon: faCalendarDay },
   { label: "Week", href: "/week", icon: faCalendarWeek },
   { label: "Month", href: "/month", icon: faCalendarDays },
   { label: "Year", href: "/year", icon: faTableCellsLarge },

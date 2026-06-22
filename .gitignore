@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 design_handoff_life_tracker
+
+# markdown (keep README tracked)
+*.md
+!README.md
