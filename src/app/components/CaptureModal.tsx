@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMicrophone, faCalendar, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faMicrophone, faCalendar, faXmark, faTrash } from '@fortawesome/free-solid-svg-icons';
 import DatePicker from 'react-date-picker';
 import Modal from './Modal';
 import { useApp } from '@/lib/app-context';
@@ -12,7 +12,7 @@ import styles from './captureModal.module.css';
 
 export default function CaptureModal() {
   const { captureState, closeCapture } = useApp();
-  const { open, task } = captureState;
+  const { open, task, prefillDate } = captureState;
 
   // CaptureForm only mounts while the modal is open (Modal renders null when
   // closed), so its state initializes fresh from `task` each session. The key
@@ -24,26 +24,48 @@ export default function CaptureModal() {
       onClose={closeCapture}
       width={480}
     >
-      <CaptureForm key={task?.id ?? 'new'} task={task} onSaved={closeCapture} />
+      <CaptureForm
+        key={task?.id ?? 'new'}
+        task={task}
+        prefillDate={prefillDate}
+        onSaved={closeCapture}
+      />
     </Modal>
   );
 }
 
-function CaptureForm({ task, onSaved }: { task: Task | null; onSaved: () => void }) {
-  const { addTask, updateTask } = useApp();
+function CaptureForm({
+  task,
+  prefillDate,
+  onSaved,
+}: {
+  task: Task | null;
+  prefillDate: Date | null;
+  onSaved: () => void;
+}) {
+  const { addTask, updateTask, deleteTask } = useApp();
   const isEdit = task !== null;
 
   const [title, setTitle] = useState(task?.title ?? '');
   const [date, setDate] = useState<Date | null>(
-    task?.scheduledAt ? new Date(task.scheduledAt) : null,
+    task?.scheduledAt ? new Date(task.scheduledAt) : prefillDate,
   );
   const [time, setTime] = useState(task?.scheduledAt ? splitDateTime(task.scheduledAt).time : '');
+
+  function handleDelete() {
+    if (!task) return;
+    void deleteTask(task.id);
+    onSaved();
+  }
 
   function handleSave() {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
 
-    const scheduledAt = date && time ? combineDateTime(toDateInput(date), time) : null;
+
+    // A date alone schedules the task; the time is optional and defaults to the
+    // start of the day. Without a date the task stays unscheduled (inbox).
+    const scheduledAt = date ? combineDateTime(toDateInput(date), time || '00:00') : null;
 
     if (isEdit && task) {
       // Note: PATCH can't clear scheduledAt, so blanking the date here leaves
@@ -98,9 +120,21 @@ function CaptureForm({ task, onSaved }: { task: Task | null; onSaved: () => void
       </div>
 
       <div className={styles.footer}>
-        <button type="button" className={styles.micBtn} aria-label="Record voice">
-          <FontAwesomeIcon icon={faMicrophone} />
-        </button>
+        <div className={styles.footerLeft}>
+          <button type="button" className={styles.micBtn} aria-label="Record voice">
+            <FontAwesomeIcon icon={faMicrophone} />
+          </button>
+          {isEdit && (
+            <button
+              type="button"
+              className={styles.deleteBtn}
+              onClick={handleDelete}
+              aria-label="Delete task"
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          )}
+        </div>
         <div className={styles.saveGroup}>
           <span className={styles.enterChip}>⏎</span>
           <button type="submit" className={styles.saveBtn}>Save</button>

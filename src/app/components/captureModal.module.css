@@ -288,6 +288,12 @@
   margin-top: 8px;
 }
 
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .micBtn {
   width: 44px;
   height: 44px;
@@ -305,6 +311,30 @@
 .micBtn:hover {
   color: var(--text-primary);
   border-color: var(--text-secondary);
+}
+
+/* Delete (edit mode only) — warms to the destructive token on hover */
+.deleteBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.deleteBtn:hover {
+  color: var(--mic-active);
+  border-color: var(--mic-active);
+}
+
+.deleteBtn svg {
+  width: 15px;
+  height: 15px;
 }
 
 .saveGroup {
