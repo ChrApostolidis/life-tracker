@@ -8,7 +8,7 @@ import styles from './fab.module.css';
 export default function Fab() {
   const { openCapture } = useApp();
   return (
-    <button className={styles.fab} onClick={openCapture} aria-label="Quick capture (Ctrl+K)">
+    <button className={styles.fab} onClick={() => openCapture()} aria-label="Quick capture (Ctrl+K)">
       <FontAwesomeIcon icon={faPlus} />
     </button>
   );

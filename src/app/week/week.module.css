@@ -1,0 +1,179 @@
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.rangeLabel {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 60vh;
+  padding: 12px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.column:hover {
+  background: var(--bg-hover);
+}
+
+.columnToday {
+  background: var(--accent-soft);
+  border-color: rgba(107, 155, 209, 0.35);
+}
+
+.columnToday:hover {
+  background: var(--accent-soft);
+}
+
+/* ── Column header ── */
+.columnHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.weekday {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.dayNumber {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.columnToday .weekday,
+.columnToday .dayNumber {
+  color: var(--accent);
+}
+
+/* ── Pills ── */
+.pills {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 120ms ease;
+}
+
+.pill:hover {
+  border-color: var(--text-muted);
+}
+
+.pillTitle {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pillDone .pillTitle {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.pillNow {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pillNow .pillTitle {
+  color: var(--bg);
+}
+
+/* Hover-trash — width reserved so the title never shifts */
+.pillDelete {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.pill:hover .pillDelete,
+.pillDelete:focus-visible {
+  opacity: 1;
+}
+
+.pillDelete:hover {
+  color: var(--mic-active);
+}
+
+.pillNow .pillDelete {
+  color: var(--bg);
+}
+
+.pillDelete svg {
+  width: 11px;
+  height: 11px;
+}
