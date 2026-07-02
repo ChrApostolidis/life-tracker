@@ -14,6 +14,7 @@ import {
   formatWeekRange,
 } from '@/lib/date';
 import { getNowId } from '@/lib/helpers';
+import PeriodNav from '@/app/components/PeriodNav';
 import type { Task } from '@/lib/types';
 import styles from './week.module.css';
 
@@ -65,13 +66,14 @@ export default function WeekPage() {
   const { tasks, loading, error, openEdit, deleteTask, setRange } = useApp();
   const router = useRouter();
   const [now, setNow] = useState(() => new Date());
+  // Which week is on screen — navigable, independent of the "now" ticker.
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
 
-  const weekStart = startOfWeek(now);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const from = weekStart.toISOString();
   const to = addDays(weekStart, 7).toISOString();
@@ -96,8 +98,15 @@ export default function WeekPage() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.eyebrow}>Week</div>
-        <h1 className={styles.rangeLabel}>{formatWeekRange(weekStart)}</h1>
+        <div>
+          <div className={styles.eyebrow}>Week</div>
+          <h1 className={styles.rangeLabel}>{formatWeekRange(weekStart)}</h1>
+        </div>
+        <PeriodNav
+          onPrev={() => setWeekStart((w) => addDays(w, -7))}
+          onToday={() => setWeekStart(startOfWeek(new Date()))}
+          onNext={() => setWeekStart((w) => addDays(w, 7))}
+        />
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
