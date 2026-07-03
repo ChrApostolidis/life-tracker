@@ -1,0 +1,54 @@
+import type { Task, TaskInput, TaskPatch } from './types';
+
+// Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+
+// Thrown on any non-2xx response. Spring hides the message body by default, so
+// callers branch on `status`, not on text.
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message?: string) {
+    super(message ?? `Request failed (HTTP ${status})`);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  body?: unknown;
+};
+
+async function request<T>(path: string, { method = 'GET', body }: RequestOptions = {}): Promise<T> {
+  const init: RequestInit = { method };
+  if (body !== undefined) {
+    init.body = JSON.stringify(body);
+    init.headers = { 'Content-Type': 'application/json' };
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, init);
+  if (!res.ok) throw new ApiError(res.status);
+  if (res.status === 204) return undefined as T; // no content
+  return (await res.json()) as T;
+}
+
+export const api = {
+  // Range views: scheduledAt in half-open [from, to), excludes inbox, includes
+  // completed, sorted by scheduledAt asc. `from`/`to` are ISO instants.
+  listRange: (from: string, to: string) =>
+    request<Task[]>(`/api/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
+  // scheduledAt IS NULL AND deletedAt IS NULL
+  listInbox: () => request<Task[]>('/api/inbox'),
+
+  create: (input: TaskInput) => request<Task>('/api/tasks', { method: 'POST', body: input }),
+
+  // Only title/scheduledAt/durationMin/recurrence are applied; null = unchanged.
+  update: (id: string, patch: TaskPatch) =>
+    request<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: patch }),
+
+  remove: (id: string) => request<void>(`/api/tasks/${id}`, { method: 'DELETE' }),
+
+  complete: (id: string) => request<Task>(`/api/tasks/${id}/complete`, { method: 'POST' }),
+  uncomplete: (id: string) => request<Task>(`/api/tasks/${id}/uncomplete`, { method: 'POST' }),
+};

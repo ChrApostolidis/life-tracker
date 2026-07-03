@@ -60,3 +60,41 @@ export function formatDate(d: Date): string {
     day: 'numeric',
   });
 }
+
+// Monday-based start of the week, local, 00:00:00.000.
+export function startOfWeek(d: Date): Date {
+  const x = startOfDay(d);
+  const daysSinceMonday = (x.getDay() + 6) % 7; // getDay(): 0=Sun … 6=Sat
+  x.setDate(x.getDate() - daysSinceMonday);
+  return x;
+}
+
+// "YYYY-MM-DD" → local Date at start of day. Malformed input → Invalid Date.
+export function fromDateInput(s: string): Date {
+  return new Date(`${s}T00:00:00`);
+}
+
+// First of the month, local, 00:00:00.000.
+export function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+// Meant for month-start anchors — a day-of-month past 28 could overflow into
+// the month after the intended one.
+export function addMonths(d: Date, n: number): Date {
+  const x = new Date(d);
+  x.setMonth(x.getMonth() + n);
+  return x;
+}
+
+// "July 2026"
+export function formatMonthYear(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+// Mon-anchored week → "Jun 30 – Jul 6"
+export function formatWeekRange(weekStart: Date): string {
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  const end = addDays(weekStart, 6);
+  return `${weekStart.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}`;
+}
