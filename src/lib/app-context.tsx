@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { Task, TaskInput, TaskPatch } from './types';
+import type { Note, NoteInput, Task, TaskInput, TaskPatch } from './types';
 import { api, ApiError } from './api';
 import { startOfDay, addDays } from './date';
 
@@ -25,6 +25,7 @@ type DateRange = { from: string; to: string }; // half-open [from, to) ISO insta
 
 type AppCtx = {
   tasks: Task[];
+  notes: Note[];
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -33,6 +34,9 @@ type AppCtx = {
   updateTask: (id: string, patch: TaskPatch) => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  addNote: (input: NoteInput) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  promoteNote: (id: string) => Promise<void>;
   captureState: CaptureState;
   openCapture: (prefillDate?: Date) => void;
   openEdit: (task: Task) => void;
@@ -64,6 +68,7 @@ function cleanPatch(patch: TaskPatch): TaskPatch {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [captureState, setCaptureState] = useState<CaptureState>({
@@ -82,26 +87,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   });
 
-  // Keep a live snapshot for async handlers that need current state to revert.
+  // Keep live snapshots for async handlers that need current state to revert.
   const tasksRef = useRef<Task[]>(tasks);
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
+  const notesRef = useRef<Note[]>(notes);
+  useEffect(() => {
+    notesRef.current = notes;
+  }, [notes]);
 
-  // Load the current window's scheduled tasks + the inbox. The range query
-  // excludes scheduledAt IS NULL, so the inbox separately feeds the Unscheduled
-  // section (shown on the Today view only).
+  // Load the current window's scheduled tasks + the inbox + standalone notes.
+  // The range query excludes scheduledAt IS NULL, so the inbox separately feeds
+  // the Unscheduled section (shown on the Today view only).
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [scheduled, inbox] = await Promise.all([
+      const [scheduled, inbox, standaloneNotes] = await Promise.all([
         api.listRange(range.from, range.to),
         api.listInbox(),
+        api.listNotes(),
       ]);
       const byId = new Map<string, Task>();
       [...scheduled, ...inbox].forEach((t) => byId.set(t.id, t));
       setTasks([...byId.values()]);
+      setNotes(standaloneNotes);
     } catch (e) {
       setError(describeError(e, 'Could not load tasks'));
     } finally {
@@ -129,7 +140,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completedAt: null,
       deletedAt: null,
       source: input.source ?? 'text',
-      rawTranscript: null,
+      rawTranscript: input.rawTranscript ?? null,
       createdAt: nowIso,
       updatedAt: nowIso,
     };
@@ -186,6 +197,55 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const addNote = useCallback(async (input: NoteInput) => {
+    const tempId = `temp-note-${Date.now()}`;
+    const nowIso = new Date().toISOString();
+    const optimistic: Note = {
+      id: tempId,
+      taskId: null,
+      body: input.body,
+      source: input.source ?? 'text',
+      rawTranscript: input.rawTranscript ?? null,
+      deletedAt: null,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+    // Newest first, matching the backend's ordering.
+    setNotes((prev) => [optimistic, ...prev]);
+    try {
+      const created = await api.createNote(input);
+      setNotes((prev) => prev.map((n) => (n.id === tempId ? created : n)));
+    } catch (e) {
+      setNotes((prev) => prev.filter((n) => n.id !== tempId));
+      setError(describeError(e, 'Could not add note'));
+    }
+  }, []);
+
+  const deleteNote = useCallback(async (id: string) => {
+    const snapshot = notesRef.current;
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await api.removeNote(id);
+    } catch (e) {
+      setNotes(snapshot);
+      setError(describeError(e, 'Could not delete note'));
+    }
+  }, []);
+
+  const promoteNote = useCallback(async (id: string) => {
+    const noteSnapshot = notesRef.current;
+    const taskSnapshot = tasksRef.current;
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    try {
+      const task = await api.promoteNote(id);
+      setTasks((prev) => [...prev, task]);
+    } catch (e) {
+      setNotes(noteSnapshot);
+      setTasks(taskSnapshot);
+      setError(describeError(e, 'Could not promote note'));
+    }
+  }, []);
+
   // Pages declare the window they need; ignore no-op changes to avoid refetch loops.
   const setRange = useCallback((from: string, to: string) => {
     setRangeState((prev) => (prev.from === from && prev.to === to ? prev : { from, to }));
@@ -221,6 +281,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider
       value={{
         tasks,
+        notes,
         loading,
         error,
         refresh,
@@ -229,6 +290,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateTask,
         toggleComplete,
         deleteTask,
+        addNote,
+        deleteNote,
+        promoteNote,
         captureState,
         openCapture,
         openEdit,

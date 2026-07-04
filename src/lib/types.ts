@@ -21,6 +21,7 @@ export type TaskInput = {
   scheduledAt: string | null;
   durationMin?: number | null;
   source?: 'text' | 'voice';
+  rawTranscript?: string | null; // original speech-to-text, kept after edits
 };
 
 // Payload for PATCH /api/tasks/{id}. Only these fields are applied server-side,
@@ -28,3 +29,23 @@ export type TaskInput = {
 export type TaskPatch = Partial<
   Pick<Task, 'title' | 'scheduledAt' | 'durationMin' | 'recurrence'>
 >;
+
+// Mirrors the backend notes entity. taskId is null for standalone notes
+// (the /notes library); non-null is reserved for task-attached notes.
+export type Note = {
+  id: string;
+  taskId: string | null;
+  body: string;
+  source: 'text' | 'voice';
+  rawTranscript: string | null;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Payload for POST /api/notes. Server sets id/createdAt/updatedAt.
+export type NoteInput = {
+  body: string;
+  source?: 'text' | 'voice';
+  rawTranscript?: string | null; // original speech-to-text, kept after edits
+};
