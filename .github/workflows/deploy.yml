@@ -22,6 +22,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
             cd ~/life-tracker/life-tracker-app
             git pull
             docker compose down
