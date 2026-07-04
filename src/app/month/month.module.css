@@ -1,0 +1,160 @@
+/* Full-width, full-height column: the grid flexes to fill what's left so the
+   whole month fits the viewport without scrolling. */
+.page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px 24px;
+  position: relative;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.titleLabel {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Weekday header row ── */
+.weekdayRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+
+.weekdayLabel {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 8px 12px;
+}
+
+/* ── Calendar grid — one bordered card, internal hairlines on the cells ── */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.cell {
+  background: var(--bg);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+/* Hairlines: right edge on all but the last column, top edge from row 2 on */
+.cell:not(:nth-child(7n)) {
+  border-right: 1px solid var(--border);
+}
+
+.cell:nth-child(n + 8) {
+  border-top: 1px solid var(--border);
+}
+
+.cell:hover {
+  background: var(--bg-hover);
+}
+
+.cellOutside {
+  opacity: 0.4;
+}
+
+/* ── Day number ── */
+.dayNumber {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 2px 4px;
+}
+
+.dayNumberToday {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ── Task lines ── */
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.taskLine {
+  font-size: 11px;
+  color: var(--text-primary);
+  padding: 1px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskLine:hover {
+  background: var(--accent-soft);
+}
+
+.taskLineDone {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.taskLineOverdue {
+  color: var(--warning);
+}
+
+.moreLine {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 1px 4px;
+}
