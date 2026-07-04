@@ -1,4 +1,4 @@
-import type { Task, TaskInput, TaskPatch } from './types';
+import type { Note, NoteInput, Task, TaskInput, TaskPatch } from './types';
 
 // Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
@@ -51,4 +51,14 @@ export const api = {
 
   complete: (id: string) => request<Task>(`/api/tasks/${id}/complete`, { method: 'POST' }),
   uncomplete: (id: string) => request<Task>(`/api/tasks/${id}/uncomplete`, { method: 'POST' }),
+
+  // Standalone notes (taskId IS NULL), newest first.
+  listNotes: () => request<Note[]>('/api/notes'),
+
+  createNote: (input: NoteInput) => request<Note>('/api/notes', { method: 'POST', body: input }),
+
+  removeNote: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
+
+  // Creates an inbox task from the note and soft-deletes the note; returns the task.
+  promoteNote: (id: string) => request<Task>(`/api/notes/${id}/promote`, { method: 'POST' }),
 };
