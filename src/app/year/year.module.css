@@ -1,0 +1,167 @@
+/* Full-height column, no page scroll: the 4×3 panel grid flexes to fill
+   whatever height the header leaves over. */
+.page {
+  height: 100%;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 32px 24px;
+  position: relative;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.yearLabel {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stats {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.statsStrong {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.legendSquare {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Month panels ── */
+.panels {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.panelCurrent {
+  border-color: rgba(107, 155, 209, 0.4);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.monthName {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+}
+
+.panelCurrent .monthName {
+  color: var(--accent);
+}
+
+.monthPct {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Day squares — fixed 7×5 so every panel keeps the same shape ── */
+.squares {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.square {
+  min-height: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.square:hover {
+  filter: brightness(1.35);
+}
+
+.squareToday {
+  box-shadow: 0 0 0 1.5px var(--text-primary);
+}
+
+/* Density scale — accent at rising alpha, per the design tokens */
+.level0 {
+  background: var(--border);
+}
+
+.level1 {
+  background: rgba(107, 155, 209, 0.28);
+}
+
+.level2 {
+  background: rgba(107, 155, 209, 0.55);
+}
+
+.level3 {
+  background: var(--accent);
+}
