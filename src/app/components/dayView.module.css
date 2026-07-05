@@ -157,18 +157,38 @@
   color: var(--accent);
 }
 
-/* Dot */
+/* Dot toggle — button gives a 44px touch target + keyboard focus without
+   changing row geometry (the ::before extends the hit area invisibly). */
+.dotBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.dotBtn::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 999px;
+}
+
+/* Dot (visual only) */
 .dot {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  flex-shrink: 0;
-  margin-right: 16px;
   position: relative;
-  z-index: 1;
   display: grid;
   place-items: center;
-  cursor: pointer;
 }
 
 .dotOpen {
@@ -283,4 +303,45 @@
   color: var(--text-muted);
   margin-top: 100px;
   text-align: center;
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 96px;
+  }
+
+  .dateDisplay {
+    font-size: 28px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+  }
+
+  .addBtnLabel {
+    display: none;
+  }
+
+  .addBtn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .row {
+    min-height: 44px;
+  }
+}
+
+/* ── Touch: reveal the hover-gated delete ── */
+@media (hover: none) {
+  .deleteRowBtn {
+    opacity: 1;
+  }
+
+  .row:active {
+    background: var(--bg-hover);
+  }
 }

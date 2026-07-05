@@ -66,6 +66,13 @@ export default function MonthPage() {
     return styles.taskLine;
   }
 
+  // Mobile cells show up to three status dots instead of text lines.
+  function dotClass(task: Task): string {
+    if (task.completedAt) return `${styles.dot} ${styles.dotDone}`;
+    if (new Date(task.scheduledAt!) < now) return `${styles.dot} ${styles.dotOverdue}`;
+    return styles.dot;
+  }
+
   function handleLineClick(e: MouseEvent, task: Task) {
     e.stopPropagation();
     openEdit(task);
@@ -128,6 +135,12 @@ export default function MonthPage() {
                   </div>
                 ))}
                 {overflow > 0 && <div className={styles.moreLine}>+{overflow} more</div>}
+              </div>
+              <div className={styles.dots}>
+                {dayTasks.slice(0, MAX_LINES).map((task) => (
+                  <span key={task.id} className={dotClass(task)} />
+                ))}
+                {overflow > 0 && <span className={styles.moreDot}>+{overflow}</span>}
               </div>
             </div>
           );

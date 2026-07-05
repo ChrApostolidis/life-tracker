@@ -81,6 +81,11 @@
   white-space: nowrap;
 }
 
+/* Wrapper is transparent on desktop; becomes the second row line on mobile */
+.meta {
+  display: contents;
+}
+
 /* Reserved width so the row layout doesn't jump when actions appear on hover */
 .actions {
   display: flex;
@@ -163,4 +168,57 @@
 .emptyIcon {
   width: 20px;
   height: 20px;
+}
+
+/* ── Touch: actions can't hide behind hover ── */
+@media (hover: none) {
+  .actions {
+    visibility: visible;
+  }
+}
+
+/* ── Mobile: two-line rows ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 80px;
+  }
+
+  .row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .body {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .actions {
+    visibility: visible;
+    width: auto;
+  }
+
+  .timestamp {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .promoteBtn {
+    min-height: 40px;
+  }
+
+  .deleteBtn {
+    width: 40px;
+    height: 40px;
+  }
 }

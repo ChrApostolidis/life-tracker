@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -30,7 +30,7 @@ export default function Modal({ open, eyebrow, onClose, width = 480, children }:
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.container}
-        style={{ width }}
+        style={{ '--modal-width': `${width}px` } as CSSProperties}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.header}>

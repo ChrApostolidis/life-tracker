@@ -15,6 +15,7 @@
   border-radius: 12px;
   padding: 28px;
   box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+  width: var(--modal-width);
   max-width: calc(100vw - 48px);
 }
 
@@ -50,4 +51,25 @@
 .closeBtn:hover {
   color: var(--text-primary);
   background: var(--bg-hover);
+}
+
+/* ── Mobile: bottom sheet ── */
+@media (max-width: 767px) {
+  .overlay {
+    align-items: flex-end;
+  }
+
+  .container {
+    width: 100%;
+    max-width: none;
+    border-radius: 12px 12px 0 0;
+    padding: 24px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+  }
+
+  .closeBtn {
+    width: 40px;
+    height: 40px;
+  }
 }

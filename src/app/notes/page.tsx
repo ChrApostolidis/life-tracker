@@ -34,24 +34,26 @@ export default function NotesPage() {
               <div key={note.id} className={styles.row}>
                 <FontAwesomeIcon icon={faNoteSticky} className={styles.rowIcon} />
                 <span className={styles.body}>{note.body}</span>
-                <div className={styles.actions}>
-                  <button
-                    type="button"
-                    className={styles.promoteBtn}
-                    onClick={() => promoteNote(note.id)}
-                  >
-                    Promote
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    onClick={() => deleteNote(note.id)}
-                    aria-label="Delete note"
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
+                <div className={styles.meta}>
+                  <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.promoteBtn}
+                      onClick={() => promoteNote(note.id)}
+                    >
+                      Promote
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => deleteNote(note.id)}
+                      aria-label="Delete note"
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </div>
+                  <span className={styles.timestamp}>{formatRelativeTime(note.createdAt)}</span>
                 </div>
-                <span className={styles.timestamp}>{formatRelativeTime(note.createdAt)}</span>
               </div>
             ))}
           </div>

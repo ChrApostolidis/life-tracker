@@ -50,13 +50,22 @@ function TimelineRow({ task, timeLabel, now, onToggle, onEdit, onDelete }: RowPr
   return (
     <div className={rowClass} onClick={() => onEdit(task)}>
       <div className={timeClass}>{timeLabel}</div>
-      <div className={dotClass} onClick={handleDotClick} role="checkbox" aria-checked={done}>
-        {done && (
-          <span className={styles.checkIcon}>
-            <FontAwesomeIcon icon={faCheck} />
-          </span>
-        )}
-      </div>
+      <button
+        type="button"
+        className={styles.dotBtn}
+        onClick={handleDotClick}
+        role="checkbox"
+        aria-checked={done}
+        aria-label={done ? 'Mark incomplete' : 'Mark complete'}
+      >
+        <span className={dotClass}>
+          {done && (
+            <span className={styles.checkIcon}>
+              <FontAwesomeIcon icon={faCheck} />
+            </span>
+          )}
+        </span>
+      </button>
       <div className={titleClass}>{task.title}</div>
       <div className={styles.indicators}>
         {now && !done && <span className={styles.nowBadge}>NOW</span>}
@@ -129,7 +138,7 @@ export default function DayView({ date }: { date: Date }) {
         </div>
         <button className={styles.addBtn} onClick={() => openCapture(date)} type="button">
           <FontAwesomeIcon icon={faPlus} />
-          <span>Add task</span>
+          <span className={styles.addBtnLabel}>Add task</span>
         </button>
       </header>
 

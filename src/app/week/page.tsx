@@ -3,7 +3,7 @@
 import { useState, useEffect, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import {
   startOfWeek,
@@ -132,6 +132,11 @@ export default function WeekPage() {
                   {day.toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
                 <span className={styles.dayNumber}>{day.getDate()}</span>
+                <FontAwesomeIcon
+                  icon={faChevronRight}
+                  className={styles.openHint}
+                  aria-hidden="true"
+                />
               </div>
               <div className={styles.pills}>
                 {dayTasks(day).map((task) => (

@@ -450,3 +450,31 @@
 .saveBtn:hover {
   opacity: 0.88;
 }
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  /* 16px inputs stop iOS from zooming on focus */
+  .timeInput,
+  .datePicker :global(.react-date-picker__wrapper) {
+    font-size: 16px;
+  }
+
+  .saveBtn {
+    min-height: 44px;
+  }
+
+  .kindOption {
+    min-height: 40px;
+  }
+
+  /* A keyboard hint is meaningless on touch */
+  .enterChip {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .dateTimeGrid {
+    grid-template-columns: 1fr;
+  }
+}

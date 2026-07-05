@@ -165,3 +165,52 @@
 .level3 {
   background: var(--accent);
 }
+
+/* ── Tablet: 2-up panels, page scrolls, squares keep their shape ── */
+@media (max-width: 1023px) {
+  .page {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .panels {
+    flex: none;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    gap: 12px;
+  }
+
+  .squares {
+    flex: none;
+    grid-template-rows: none;
+  }
+
+  .square {
+    aspect-ratio: 1;
+  }
+}
+
+/* ── Mobile: stack the header ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 24px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .headerRight {
+    align-items: flex-start;
+  }
+}
+
+/* ── Touch: replace hover brightness with an active state ── */
+@media (hover: none) {
+  .square:active {
+    filter: brightness(1.35);
+  }
+}

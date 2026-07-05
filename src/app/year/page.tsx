@@ -164,6 +164,7 @@ function MonthPanel({ year, month, current, todayKey, statsByDay, onDayClick }: 
               .filter(Boolean)
               .join(' ')}
             title={tooltip(date, stats)}
+            aria-label={tooltip(date, stats)}
             onClick={() => onDayClick(key)}
           />
         ))}

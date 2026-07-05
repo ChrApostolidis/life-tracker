@@ -79,6 +79,14 @@
   border-bottom: 1px solid var(--border);
 }
 
+/* "open day" affordance — mobile only (desktop uses the hover column) */
+.openHint {
+  display: none;
+  width: 12px;
+  height: 12px;
+  color: var(--text-muted);
+}
+
 .weekday {
   font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -179,4 +187,47 @@
 .pillDelete svg {
   width: 11px;
   height: 11px;
+}
+
+/* ── Mobile: vertical stacked agenda ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 80px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .column {
+    min-height: 0;
+  }
+
+  .columnHeader {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .openHint {
+    display: block;
+    margin-left: auto;
+    align-self: center;
+  }
+
+  .pill {
+    min-height: 44px;
+  }
+}
+
+/* ── Touch: reveal the hover-gated delete ── */
+@media (hover: none) {
+  .pillDelete {
+    opacity: 1;
+  }
 }

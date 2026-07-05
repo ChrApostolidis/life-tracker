@@ -158,3 +158,65 @@
   font-style: italic;
   padding: 1px 4px;
 }
+
+/* ── Status dots (mobile only) ── */
+.dots {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.dotDone {
+  background: var(--success);
+}
+
+.dotOverdue {
+  background: var(--warning);
+}
+
+.moreDot {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ── Mobile: natural-height scrolling calendar with dot cells ── */
+@media (max-width: 767px) {
+  .page {
+    height: auto;
+    min-height: 100%;
+    padding: 32px 12px 24px;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .grid {
+    flex: none;
+    grid-template-rows: none;
+    grid-auto-rows: minmax(56px, auto);
+  }
+
+  .weekdayLabel {
+    padding: 8px 4px;
+    text-align: center;
+  }
+
+  .lines {
+    display: none;
+  }
+
+  .dots {
+    display: flex;
+  }
+}

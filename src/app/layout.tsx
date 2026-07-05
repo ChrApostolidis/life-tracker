@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "react-calendar/dist/Calendar.css";
 import "react-date-picker/dist/DatePicker.css";
 import "./globals.css";
-import NavBar from "./components/NavBar";
+import AppShell from "./components/AppShell";
 import { AppProvider } from "@/lib/app-context";
 import CaptureModal from "./components/CaptureModal";
 import Fab from "./components/Fab";
@@ -19,6 +19,12 @@ export const metadata: Metadata = {
   description: "Your personal life tracking app",
 };
 
+
+export const viewport: Viewport = {
+  themeColor: "#0e0f12",
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,10 +34,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body>
         <AppProvider>
-          <div className="app-shell">
-            <NavBar />
-            <main className="app-main">{children}</main>
-          </div>
+          <AppShell>{children}</AppShell>
           <Fab />
           <CaptureModal />
         </AppProvider>

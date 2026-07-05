@@ -23,6 +23,11 @@
 }
 
 
+/* Responsive breakpoints (hardcoded per module — keep these values in sync):
+   mobile  @media (max-width: 767px)    drawer nav, single-column, bottom-sheet modal
+   tablet  @media (max-width: 1023px)   Year panels only
+   touch   @media (hover: none)         reveal hover-gated actions on touch devices */
+
 html,
 body {
   font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
@@ -31,17 +36,7 @@ body {
   height: 100%;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.app-shell {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.app-main {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  position: relative;
-}
+/* The app shell (.shell / .main) now lives in appShell.module.css. */
