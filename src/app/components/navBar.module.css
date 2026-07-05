@@ -2,6 +2,7 @@
   background-color: var(--bg-elevated);
   color: var(--text-primary);
   height: 100vh;
+  height: 100dvh;
   width: 240px;
   display: flex;
   flex-direction: column;
@@ -16,6 +17,11 @@
   gap: 10px;
   padding: 4px 8px 24px;
   flex-shrink: 0;
+}
+
+/* Drawer close button — mobile only */
+.closeBtn {
+  display: none;
 }
 
 .logoBadge {
@@ -157,4 +163,50 @@
   font-size: 11px;
   color: var(--text-muted);
   font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+/* ── Mobile: off-canvas drawer ── */
+@media (max-width: 767px) {
+  .navBar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 200;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 200ms ease, visibility 200ms ease;
+    overscroll-behavior: contain;
+    padding-left: calc(16px + env(safe-area-inset-left));
+    padding-top: calc(24px + env(safe-area-inset-top));
+  }
+
+  .navBarOpen {
+    transform: none;
+    visibility: visible;
+  }
+
+  .navItem {
+    min-height: 44px;
+  }
+
+  .closeBtn {
+    display: grid;
+    place-items: center;
+    margin-left: auto;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .closeBtn:active {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
 }

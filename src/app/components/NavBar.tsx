@@ -2,47 +2,49 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCalendarDay,
-  faCalendarDays,
-  faCalendarWeek,
-  faInbox,
-  faNoteSticky,
-  faTableCellsLarge,
-} from "@fortawesome/free-solid-svg-icons";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { navItems, isActivePath } from "./nav-items";
 import styles from "./navBar.module.css";
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: IconDefinition;
-  badge?: string;
+type Props = {
+  id?: string;
+  open?: boolean;
+  onClose?: () => void;
 };
 
-const navItems: NavItem[] = [
-  { label: "Today", href: "/", icon: faCalendarDay },
-  { label: "Week", href: "/week", icon: faCalendarWeek },
-  { label: "Month", href: "/month", icon: faCalendarDays },
-  { label: "Year", href: "/year", icon: faTableCellsLarge },
-  { label: "Inbox", href: "/inbox", icon: faInbox },
-  { label: "Notes", href: "/notes", icon: faNoteSticky },
-];
-
-export default function NavBar() {
+export default function NavBar({ id, open = false, onClose }: Props) {
   const pathname = usePathname();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // When the drawer opens on mobile, move focus into it.
+  useEffect(() => {
+    if (open) closeBtnRef.current?.focus();
+  }, [open]);
 
   return (
-    <nav className={styles.navBar}>
+    <nav
+      id={id}
+      className={[styles.navBar, open ? styles.navBarOpen : ""].filter(Boolean).join(" ")}
+    >
       <div className={styles.navHeader}>
         <div className={styles.logoBadge} aria-hidden="true">L</div>
         <span className={styles.logoText}>Life Tracker</span>
+        <button
+          ref={closeBtnRef}
+          type="button"
+          className={styles.closeBtn}
+          onClick={onClose}
+          aria-label="Close navigation"
+        >
+          <FontAwesomeIcon icon={faXmark} />
+        </button>
       </div>
       <div className={styles.navContent}>
         <ul className={styles.navList}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = isActivePath(pathname, item.href);
             return (
               <li key={item.label}>
                 <Link
