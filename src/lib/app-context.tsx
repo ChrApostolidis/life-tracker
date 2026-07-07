@@ -9,15 +9,16 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { Note, NoteInput, Task, TaskInput, TaskPatch } from './types';
-import { api, ApiError } from './api';
+import type { Note, NoteInput, NotePatch, Task, TaskInput, TaskPatch } from './types';
+import { api, describeError } from './api';
 import { startOfDay, addDays } from './date';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
 type CaptureState = {
   open: boolean;
-  task: Task | null;
+  task: Task | null; // non-null = editing this task
+  note: Note | null; // non-null = editing this note
   prefillDate: Date | null; // seeds the date field when adding for a specific day
 };
 
@@ -35,20 +36,17 @@ type AppCtx = {
   toggleComplete: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   addNote: (input: NoteInput) => Promise<void>;
+  updateNote: (id: string, patch: NotePatch) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   promoteNote: (id: string) => Promise<void>;
   captureState: CaptureState;
   openCapture: (prefillDate?: Date) => void;
   openEdit: (task: Task) => void;
+  openEditNote: (note: Note) => void;
   closeCapture: () => void;
 };
 
 const AppContext = createContext<AppCtx | null>(null);
-
-function describeError(e: unknown, fallback: string): string {
-  if (e instanceof ApiError) return `${fallback} (HTTP ${e.status})`;
-  return fallback;
-}
 
 // PATCH treats null as "leave unchanged", so drop null/undefined keys before
 // sending — otherwise we'd silently no-op while the UI thinks it changed.
@@ -74,6 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [captureState, setCaptureState] = useState<CaptureState>({
     open: false,
     task: null,
+    note: null,
     prefillDate: null,
   });
 
@@ -221,6 +220,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const updateNote = useCallback(async (id: string, patch: NotePatch) => {
+    const snapshot = notesRef.current;
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...patch } : n)));
+    try {
+      const updated = await api.updateNote(id, patch);
+      setNotes((prev) => prev.map((n) => (n.id === id ? updated : n)));
+    } catch (e) {
+      setNotes(snapshot);
+      setError(describeError(e, 'Could not update note'));
+    }
+  }, []);
+
   const deleteNote = useCallback(async (id: string) => {
     const snapshot = notesRef.current;
     setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -253,15 +264,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const openCapture = useCallback(
     (prefillDate?: Date) =>
-      setCaptureState({ open: true, task: null, prefillDate: prefillDate ?? null }),
+      setCaptureState({ open: true, task: null, note: null, prefillDate: prefillDate ?? null }),
     [],
   );
   const openEdit = useCallback(
-    (task: Task) => setCaptureState({ open: true, task, prefillDate: null }),
+    (task: Task) => setCaptureState({ open: true, task, note: null, prefillDate: null }),
+    [],
+  );
+  const openEditNote = useCallback(
+    (note: Note) => setCaptureState({ open: true, task: null, note, prefillDate: null }),
     [],
   );
   const closeCapture = useCallback(
-    () => setCaptureState({ open: false, task: null, prefillDate: null }),
+    () => setCaptureState({ open: false, task: null, note: null, prefillDate: null }),
     [],
   );
 
@@ -291,11 +306,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         toggleComplete,
         deleteTask,
         addNote,
+        updateNote,
         deleteNote,
         promoteNote,
         captureState,
         openCapture,
         openEdit,
+        openEditNote,
         closeCapture,
       }}
     >

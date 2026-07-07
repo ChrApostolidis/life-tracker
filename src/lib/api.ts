@@ -1,4 +1,15 @@
-import type { Note, NoteInput, Task, TaskInput, TaskPatch } from './types';
+import type {
+  MoneyBalance,
+  MoneyEntry,
+  MoneyEntryInput,
+  MoneyEntryPatch,
+  Note,
+  NoteInput,
+  NotePatch,
+  Task,
+  TaskInput,
+  TaskPatch,
+} from './types';
 
 // Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
@@ -12,6 +23,12 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = status;
   }
+}
+
+// Human-readable message for optimistic-mutation rollbacks.
+export function describeError(e: unknown, fallback: string): string {
+  if (e instanceof ApiError) return `${fallback} (HTTP ${e.status})`;
+  return fallback;
 }
 
 type RequestOptions = {
@@ -57,8 +74,26 @@ export const api = {
 
   createNote: (input: NoteInput) => request<Note>('/api/notes', { method: 'POST', body: input }),
 
+  updateNote: (id: string, patch: NotePatch) =>
+    request<Note>(`/api/notes/${id}`, { method: 'PATCH', body: patch }),
+
   removeNote: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
 
   // Creates an inbox task from the note and soft-deletes the note; returns the task.
   promoteNote: (id: string) => request<Task>(`/api/notes/${id}/promote`, { method: 'POST' }),
+
+  // Money entries: occurredOn in half-open [from, to), local 'YYYY-MM-DD' dates.
+  listMoney: (from: string, to: string) =>
+    request<MoneyEntry[]>(`/api/money?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
+  createMoney: (input: MoneyEntryInput) =>
+    request<MoneyEntry>('/api/money', { method: 'POST', body: input }),
+
+  updateMoney: (id: string, patch: MoneyEntryPatch) =>
+    request<MoneyEntry>(`/api/money/${id}`, { method: 'PATCH', body: patch }),
+
+  removeMoney: (id: string) => request<void>(`/api/money/${id}`, { method: 'DELETE' }),
+
+  // All-time { earnedCents, spentCents } — the piggy bank balance.
+  moneyBalance: () => request<MoneyBalance>('/api/money/balance'),
 };
