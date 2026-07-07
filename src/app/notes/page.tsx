@@ -1,13 +1,13 @@
 'use client';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faNoteSticky, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faNoteSticky, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import { formatRelativeTime } from '@/lib/date';
 import styles from './notes.module.css';
 
 export default function NotesPage() {
-  const { notes, loading, error, deleteNote, promoteNote } = useApp();
+  const { notes, loading, error, deleteNote, promoteNote, openEditNote } = useApp();
 
   return (
     <div className={styles.page}>
@@ -36,6 +36,14 @@ export default function NotesPage() {
                 <span className={styles.body}>{note.body}</span>
                 <div className={styles.meta}>
                   <div className={styles.actions}>
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      onClick={() => openEditNote(note)}
+                      aria-label="Edit note"
+                    >
+                      <FontAwesomeIcon icon={faPen} />
+                    </button>
                     <button
                       type="button"
                       className={styles.promoteBtn}
