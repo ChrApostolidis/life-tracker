@@ -9,7 +9,7 @@ import VoiceConfirm from './VoiceConfirm';
 import { useApp } from '@/lib/app-context';
 import { combineDateTime, splitDateTime, toDateInput } from '@/lib/date';
 import { useSpeechRecognition } from '@/lib/use-speech-recognition';
-import type { Task } from '@/lib/types';
+import type { Note, Task } from '@/lib/types';
 import styles from './captureModal.module.css';
 
 type CaptureKind = 'task' | 'note';
@@ -19,7 +19,7 @@ const VOICE_LANG_KEY = 'lt-voice-lang';
 
 export default function CaptureModal() {
   const { captureState, closeCapture } = useApp();
-  const { open, task, prefillDate } = captureState;
+  const { open, task, note, prefillDate } = captureState;
 
   // Lifted here (not in CaptureForm) because the voice-confirm view needs them
   // and it replaces the form inside the same modal.
@@ -35,7 +35,13 @@ export default function CaptureModal() {
   }
 
   const confirming = voiceTranscript !== null;
-  const eyebrow = confirming ? 'Heard you' : task ? 'Edit Task' : 'Quick Capture';
+  const eyebrow = confirming
+    ? 'Heard you'
+    : task
+      ? 'Edit Task'
+      : note
+        ? 'Edit Note'
+        : 'Quick Capture';
 
   return (
     <Modal open={open} eyebrow={eyebrow} onClose={handleClose} width={confirming ? 520 : 480}>
@@ -49,8 +55,9 @@ export default function CaptureModal() {
         />
       ) : (
         <CaptureForm
-          key={task?.id ?? 'new'}
+          key={task?.id ?? note?.id ?? 'new'}
           task={task}
+          note={note}
           prefillDate={prefillDate}
           kind={kind}
           onKindChange={setKind}
@@ -64,6 +71,7 @@ export default function CaptureModal() {
 
 function CaptureForm({
   task,
+  note,
   prefillDate,
   kind,
   onKindChange,
@@ -71,16 +79,20 @@ function CaptureForm({
   onSaved,
 }: {
   task: Task | null;
+  note: Note | null;
   prefillDate: Date | null;
   kind: CaptureKind;
   onKindChange: (kind: CaptureKind) => void;
   onVoiceCaptured: (transcript: string) => void;
   onSaved: () => void;
 }) {
-  const { addTask, updateTask, deleteTask, addNote } = useApp();
-  const isEdit = task !== null;
+  const { addTask, updateTask, deleteTask, addNote, updateNote, deleteNote } = useApp();
+  const isTaskEdit = task !== null;
+  const isNoteEdit = note !== null;
+  // Note mode (new capture or edit): multi-line body, no date fields.
+  const noteMode = isNoteEdit || (!isTaskEdit && kind === 'note');
 
-  const [title, setTitle] = useState(task?.title ?? '');
+  const [title, setTitle] = useState(task?.title ?? note?.body ?? '');
   const [date, setDate] = useState<Date | null>(
     task?.scheduledAt ? new Date(task.scheduledAt) : prefillDate,
   );
@@ -126,8 +138,8 @@ function CaptureForm({
   const liveText = [speech.transcript, speech.interimTranscript].filter(Boolean).join(' ');
 
   function handleDelete() {
-    if (!task) return;
-    void deleteTask(task.id);
+    if (task) void deleteTask(task.id);
+    else if (note) void deleteNote(note.id);
     onSaved();
   }
 
@@ -136,7 +148,13 @@ function CaptureForm({
     const trimmedTitle = title.trim();
     if (!trimmedTitle) return;
 
-    if (kind === 'note' && !isEdit) {
+    if (isNoteEdit && note) {
+      void updateNote(note.id, { body: trimmedTitle });
+      onSaved();
+      return;
+    }
+
+    if (kind === 'note' && !isTaskEdit) {
       void addNote({ body: trimmedTitle });
       onSaved();
       return;
@@ -146,7 +164,7 @@ function CaptureForm({
     // start of the day. Without a date the task stays unscheduled (inbox).
     const scheduledAt = date ? combineDateTime(toDateInput(date), time || '00:00') : null;
 
-    if (isEdit && task) {
+    if (isTaskEdit && task) {
       // Note: PATCH can't clear scheduledAt, so blanking the date here leaves
       // the task scheduled server-side; un-scheduling needs a backend change.
       void updateTask(task.id, { title: trimmedTitle, scheduledAt });
@@ -161,7 +179,7 @@ function CaptureForm({
       className={styles.form}
       onSubmit={(e) => { e.preventDefault(); handleSave(); }}
     >
-      {!isEdit && (
+      {!isTaskEdit && !isNoteEdit && (
         <div className={styles.kindToggle} role="radiogroup" aria-label="Capture as">
           <button
             type="button"
@@ -188,22 +206,35 @@ function CaptureForm({
         </div>
       )}
 
-      <input
-        className={styles.titleInput}
-        placeholder={
-          speech.listening
-            ? 'Listening…'
-            : kind === 'note' && !isEdit
-              ? 'Capture a thought'
-              : "What's on your mind?"
-        }
-        value={speech.listening ? liveText : title}
-        onChange={(e) => setTitle(e.target.value)}
-        readOnly={speech.listening}
-        autoFocus
-      />
+      {noteMode ? (
+        <textarea
+          className={`${styles.titleInput} ${styles.noteInput}`}
+          placeholder={speech.listening ? 'Listening…' : 'Capture a thought'}
+          value={speech.listening ? liveText : title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter saves (textareas don't submit the form); Shift+Enter makes a newline
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSave();
+            }
+          }}
+          readOnly={speech.listening}
+          rows={5}
+          autoFocus
+        />
+      ) : (
+        <input
+          className={styles.titleInput}
+          placeholder={speech.listening ? 'Listening…' : "What's on your mind?"}
+          value={speech.listening ? liveText : title}
+          onChange={(e) => setTitle(e.target.value)}
+          readOnly={speech.listening}
+          autoFocus
+        />
+      )}
 
-      {(isEdit || kind === 'task') && (
+      {!noteMode && (
         <DateTimeFields date={date} time={time} onDateChange={setDate} onTimeChange={setTime} />
       )}
 
@@ -211,7 +242,7 @@ function CaptureForm({
 
       <div className={styles.footer}>
         <div className={styles.footerLeft}>
-          {!isEdit && (
+          {!isTaskEdit && !isNoteEdit && (
             <>
               <button
                 type="button"
@@ -242,12 +273,12 @@ function CaptureForm({
               </button>
             </>
           )}
-          {isEdit && (
+          {(isTaskEdit || isNoteEdit) && (
             <button
               type="button"
               className={styles.deleteBtn}
               onClick={handleDelete}
-              aria-label="Delete task"
+              aria-label={isTaskEdit ? 'Delete task' : 'Delete note'}
             >
               <FontAwesomeIcon icon={faTrash} />
             </button>

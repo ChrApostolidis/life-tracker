@@ -60,6 +60,13 @@
   box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.10);
 }
 
+/* Note capture: thoughts need more room than a one-line title */
+.noteInput {
+  min-height: 140px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 /* ── Date / Time grid ── */
 .dateTimeGrid {
   display: grid;
