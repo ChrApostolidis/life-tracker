@@ -1,6 +1,4 @@
 .page {
-  max-width: 960px;
-  margin: 0 auto;
   padding: 48px 24px 80px;
   position: relative;
 }
@@ -39,9 +37,11 @@
 
 /* ── Grid ── */
 .grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 12px;
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .column {
@@ -55,6 +55,8 @@
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 120ms ease, border-color 120ms ease;
+  width: 100%;
+  max-width: 220px;
 }
 
 .column:hover {

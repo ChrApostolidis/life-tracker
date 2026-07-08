@@ -4,6 +4,7 @@ import {
   faCalendarWeek,
   faNoteSticky,
   faTableCellsLarge,
+  faWallet,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
@@ -22,6 +23,7 @@ export const navItems: NavItem[] = [
   { label: "Month", href: "/month", icon: faCalendarDays },
   { label: "Year", href: "/year", icon: faTableCellsLarge },
   { label: "Notes", href: "/notes", icon: faNoteSticky },
+  { label: "Money", href: "/money", icon: faWallet },
 ];
 
 // Exact match or a nested segment (e.g. /week/… still highlights Week).
