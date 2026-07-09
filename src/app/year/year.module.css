@@ -1,5 +1,4 @@
-/* Full-height column, no page scroll: the 4×3 panel grid flexes to fill
-   whatever height the header leaves over. */
+
 .page {
   height: 100%;
   width: 100%;

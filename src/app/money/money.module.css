@@ -1,11 +1,36 @@
 .page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 40px;
+}
+
+/* ── Body: money log left, stats right ── */
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100%;
+  max-width: 1330px;
+}
+
+.moneyCol {
+  margin-top: 20px;
+  flex: 1 1 420px;
+  max-width: 600px;
+  min-width: 0;
+}
+
+.statsCol {
+  flex: 1 1 480px;
+  max-width: 700px;
+  min-width: 0;
 }
 
 /* ── Header ── */
 .header {
+  align-self: stretch;
   margin-bottom: 24px;
 }
 
@@ -324,7 +349,8 @@
 
 /* ── Stats ── */
 .statsBlock {
-  margin-top: 32px;
+  max-width: 600px;
+  width: 100%;
 }
 
 .sectionLabel {
@@ -516,6 +542,15 @@
 
   .headerRow {
     flex-wrap: wrap;
+  }
+
+  .body {
+    flex-direction: column;
+  }
+
+  .moneyCol {
+    flex-basis: auto;
+    width: 100%;
   }
 
   .title {

@@ -193,6 +193,8 @@ export default function MoneyPage() {
         </div>
       </header>
 
+      <div className={styles.body}>
+      <div className={styles.moneyCol}>
       <form className={styles.capture} onSubmit={handleSubmit}>
         <div className={styles.captureTop}>
           <input
@@ -314,7 +316,9 @@ export default function MoneyPage() {
           </div>
         )
       )}
+      </div>
 
+      <div className={styles.statsCol}>
       <section className={styles.statsBlock}>
         <div className={styles.sectionLabel}>Stats</div>
 
@@ -386,6 +390,8 @@ export default function MoneyPage() {
           </div>
         </section>
       </section>
+      </div>
+      </div>
     </div>
   );
 }
