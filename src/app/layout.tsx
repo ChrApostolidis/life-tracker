@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "react-calendar/dist/Calendar.css";
 import "react-date-picker/dist/DatePicker.css";
 import "./globals.css";
@@ -8,10 +8,12 @@ import { AppProvider } from "@/lib/app-context";
 import CaptureModal from "./components/CaptureModal";
 import Fab from "./components/Fab";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Self-hosted so Docker builds never depend on Google Fonts being reachable.
+// Variable font covers Latin + Greek and every weight the app uses.
+const inter = localFont({
+  src: "./fonts/InterVariable.woff2",
   variable: "--font-inter",
-  weight: ["400", "500", "600"],
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {

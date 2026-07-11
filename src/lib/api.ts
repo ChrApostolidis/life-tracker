@@ -12,7 +12,9 @@ import type {
 } from './types';
 
 // Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+// `||` (not `??`) so an empty build-time value still falls back instead of
+// silently producing relative same-origin URLs.
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Thrown on any non-2xx response. Spring hides the message body by default, so
 // callers branch on `status`, not on text.
