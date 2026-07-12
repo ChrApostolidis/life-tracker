@@ -29,6 +29,9 @@ type AppCtx = {
   notes: Note[];
   loading: boolean;
   error: string | null;
+  // Bumped after every task mutation so range-independent consumers (e.g. the
+  // sidebar Today ring) can refetch without sharing the page's date window.
+  taskRevision: number;
   refresh: () => Promise<void>;
   setRange: (from: string, to: string) => void;
   addTask: (input: TaskInput) => Promise<void>;
@@ -69,6 +72,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [taskRevision, setTaskRevision] = useState(0);
+  const bumpTasks = useCallback(() => setTaskRevision((n) => n + 1), []);
   const [captureState, setCaptureState] = useState<CaptureState>({
     open: false,
     task: null,
@@ -147,11 +152,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const created = await api.create(input);
       setTasks((prev) => prev.map((t) => (t.id === tempId ? created : t)));
+      bumpTasks();
     } catch (e) {
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
       setError(describeError(e, 'Could not add task'));
     }
-  }, []);
+  }, [bumpTasks]);
 
   const updateTask = useCallback(async (id: string, patch: TaskPatch) => {
     const clean = cleanPatch(patch);
@@ -160,11 +166,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const updated = await api.update(id, clean);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      bumpTasks();
     } catch (e) {
       setTasks(snapshot);
       setError(describeError(e, 'Could not update task'));
     }
-  }, []);
+  }, [bumpTasks]);
 
   const toggleComplete = useCallback(async (id: string) => {
     const task = tasksRef.current.find((t) => t.id === id);
@@ -179,22 +186,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const updated = wasDone ? await api.uncomplete(id) : await api.complete(id);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      bumpTasks();
     } catch (e) {
       setTasks(snapshot);
       setError(describeError(e, 'Could not update task'));
     }
-  }, []);
+  }, [bumpTasks]);
 
   const deleteTask = useCallback(async (id: string) => {
     const snapshot = tasksRef.current;
     setTasks((prev) => prev.filter((t) => t.id !== id));
     try {
       await api.remove(id);
+      bumpTasks();
     } catch (e) {
       setTasks(snapshot);
       setError(describeError(e, 'Could not delete task'));
     }
-  }, []);
+  }, [bumpTasks]);
 
   const addNote = useCallback(async (input: NoteInput) => {
     const tempId = `temp-note-${Date.now()}`;
@@ -299,6 +308,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         notes,
         loading,
         error,
+        taskRevision,
         refresh,
         setRange,
         addTask,
