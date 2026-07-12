@@ -118,44 +118,8 @@
 .navFooter {
   margin-top: auto;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 8px 4px;
+  padding-top: 12px;
   border-top: 1px solid var(--border);
-}
-
-.userAvatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--text-muted) 100%);
-  color: var(--text-primary);
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: lowercase;
-  flex-shrink: 0;
-}
-
-.userMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.userStatus {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
 }
 
 /* ── Mobile: off-canvas drawer ── */

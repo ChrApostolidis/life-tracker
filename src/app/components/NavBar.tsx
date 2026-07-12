@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { navItems, isActivePath } from "./nav-items";
+import TodayRing from "./TodayRing";
 import styles from "./navBar.module.css";
 
 type Props = {
@@ -74,11 +75,7 @@ export default function NavBar({ id, open = false, onClose }: Props) {
         </ul>
       </div>
       <div className={styles.navFooter}>
-        <div className={styles.userAvatar} aria-hidden="true">X</div>
-        <div className={styles.userMeta}>
-          <div className={styles.userName}>Xristos</div>
-          <div className={styles.userStatus}>local · synced 2m</div>
-        </div>
+        <TodayRing />
       </div>
     </nav>
   );

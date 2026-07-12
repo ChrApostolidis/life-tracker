@@ -1,0 +1,63 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 10px;
+  transition: background-color 120ms ease;
+}
+
+.wrap:hover {
+  background: var(--bg-hover);
+}
+
+.ring {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.track {
+  stroke: var(--border);
+}
+
+.progress {
+  stroke: var(--accent);
+  transition: stroke-dashoffset 400ms ease;
+}
+
+.progressDone {
+  stroke: var(--success);
+  transition: stroke-dashoffset 400ms ease;
+}
+
+.count {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
