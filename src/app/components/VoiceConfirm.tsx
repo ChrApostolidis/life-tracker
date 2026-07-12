@@ -55,10 +55,17 @@ export default function VoiceConfirm({ transcript, kind, prefillDate, onRerecord
           <label className={capStyles.fieldLabel}>Title</label>
           <span className={styles.parsedChip}>✦ parsed from voice</span>
         </div>
-        <input
+        <textarea
           className={capStyles.titleInput}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSave();
+            }
+          }}
+          rows={5}
           autoFocus
         />
       </div>

@@ -29,8 +29,9 @@ export default function NavBar({ id, open = false, onClose }: Props) {
       className={[styles.navBar, open ? styles.navBarOpen : ""].filter(Boolean).join(" ")}
     >
       <div className={styles.navHeader}>
-        <div className={styles.logoBadge} aria-hidden="true">L</div>
-        <span className={styles.logoText}>Life Tracker</span>
+        <span className={styles.logoText}>
+          Life<span className={styles.logoAccent}>Tracker</span>
+        </span>
         <button
           ref={closeBtnRef}
           type="button"

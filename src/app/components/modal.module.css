@@ -10,13 +10,17 @@
 }
 
 .container {
+  display: flex;
+  flex-direction: column;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 28px;
   box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6);
   width: var(--modal-width);
+  height: var(--modal-height);
   max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 48px);
 }
 
 .header {
@@ -24,6 +28,13 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .eyebrow {
@@ -61,6 +72,7 @@
 
   .container {
     width: 100%;
+    height: auto;
     max-width: none;
     border-radius: 12px 12px 0 0;
     padding: 24px 20px calc(20px + env(safe-area-inset-bottom));

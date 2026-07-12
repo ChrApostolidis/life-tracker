@@ -24,25 +24,18 @@
   display: none;
 }
 
-.logoBadge {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--bg);
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-  flex-shrink: 0;
-}
-
 .logoText {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
-  letter-spacing: -0.1px;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+/* Second half of the wordmark carries the accent so the name reads as one
+   two-tone unit without needing a separate icon. */
+.logoAccent {
+  color: var(--accent);
 }
 
 .navContent {

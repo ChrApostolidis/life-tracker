@@ -35,6 +35,7 @@ export default function CaptureModal() {
   }
 
   const confirming = voiceTranscript !== null;
+  const isNewCapture = !task && !note && !confirming;
   const eyebrow = confirming
     ? 'Heard you'
     : task
@@ -43,8 +44,42 @@ export default function CaptureModal() {
         ? 'Edit Note'
         : 'Quick Capture';
 
+  const kindToggle = isNewCapture && (
+    <div className={styles.kindToggle} role="radiogroup" aria-label="Capture as">
+      <button
+        type="button"
+        role="radio"
+        aria-checked={kind === 'task'}
+        className={[styles.kindOption, kind === 'task' ? styles.kindOptionActive : '']
+          .filter(Boolean)
+          .join(' ')}
+        onClick={() => setKind('task')}
+      >
+        Task
+      </button>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={kind === 'note'}
+        className={[styles.kindOption, kind === 'note' ? styles.kindOptionActive : '']
+          .filter(Boolean)
+          .join(' ')}
+        onClick={() => setKind('note')}
+      >
+        Note
+      </button>
+    </div>
+  );
+
   return (
-    <Modal open={open} eyebrow={eyebrow} onClose={handleClose} width={confirming ? 520 : 480}>
+    <Modal
+      open={open}
+      eyebrow={eyebrow}
+      eyebrowExtra={kindToggle}
+      onClose={handleClose}
+      width={560}
+      height={640}
+    >
       {confirming ? (
         <VoiceConfirm
           transcript={voiceTranscript}
@@ -60,7 +95,6 @@ export default function CaptureModal() {
           note={note}
           prefillDate={prefillDate}
           kind={kind}
-          onKindChange={setKind}
           onVoiceCaptured={setVoiceTranscript}
           onSaved={handleClose}
         />
@@ -74,7 +108,6 @@ function CaptureForm({
   note,
   prefillDate,
   kind,
-  onKindChange,
   onVoiceCaptured,
   onSaved,
 }: {
@@ -82,7 +115,6 @@ function CaptureForm({
   note: Note | null;
   prefillDate: Date | null;
   kind: CaptureKind;
-  onKindChange: (kind: CaptureKind) => void;
   onVoiceCaptured: (transcript: string) => void;
   onSaved: () => void;
 }) {
@@ -179,60 +211,24 @@ function CaptureForm({
       className={styles.form}
       onSubmit={(e) => { e.preventDefault(); handleSave(); }}
     >
-      {!isTaskEdit && !isNoteEdit && (
-        <div className={styles.kindToggle} role="radiogroup" aria-label="Capture as">
-          <button
-            type="button"
-            role="radio"
-            aria-checked={kind === 'task'}
-            className={[styles.kindOption, kind === 'task' ? styles.kindOptionActive : '']
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => onKindChange('task')}
-          >
-            Task
-          </button>
-          <button
-            type="button"
-            role="radio"
-            aria-checked={kind === 'note'}
-            className={[styles.kindOption, kind === 'note' ? styles.kindOptionActive : '']
-              .filter(Boolean)
-              .join(' ')}
-            onClick={() => onKindChange('note')}
-          >
-            Note
-          </button>
-        </div>
-      )}
-
-      {noteMode ? (
-        <textarea
-          className={`${styles.titleInput} ${styles.noteInput}`}
-          placeholder={speech.listening ? 'Listening…' : 'Capture a thought'}
-          value={speech.listening ? liveText : title}
-          onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={(e) => {
-            // Enter saves (textareas don't submit the form); Shift+Enter makes a newline
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSave();
-            }
-          }}
-          readOnly={speech.listening}
-          rows={5}
-          autoFocus
-        />
-      ) : (
-        <input
-          className={styles.titleInput}
-          placeholder={speech.listening ? 'Listening…' : "What's on your mind?"}
-          value={speech.listening ? liveText : title}
-          onChange={(e) => setTitle(e.target.value)}
-          readOnly={speech.listening}
-          autoFocus
-        />
-      )}
+      <textarea
+        className={noteMode ? `${styles.titleInput} ${styles.noteInput}` : styles.titleInput}
+        placeholder={
+          speech.listening ? 'Listening…' : noteMode ? 'Capture a thought' : "What's on your mind?"
+        }
+        value={speech.listening ? liveText : title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          // Enter saves (textareas don't submit the form); Shift+Enter makes a newline
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSave();
+          }
+        }}
+        readOnly={speech.listening}
+        rows={5}
+        autoFocus
+      />
 
       {!noteMode && (
         <DateTimeFields date={date} time={time} onDateChange={setDate} onTimeChange={setTime} />

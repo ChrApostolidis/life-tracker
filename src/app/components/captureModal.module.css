@@ -2,12 +2,14 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
-/* ── Task | Note destination toggle ── */
+/* ── Task | Note destination toggle (sits next to the modal eyebrow) ── */
 .kindToggle {
   display: inline-flex;
-  align-self: flex-start;
   gap: 4px;
   padding: 4px;
   background: var(--bg);
@@ -38,9 +40,11 @@
   color: var(--accent);
 }
 
-/* ── Title input ── */
+/* ── Title input (textarea for both task and note: wraps automatically,
+   placeholder sits top-left instead of vertically centered like <input>) ── */
 .titleInput {
   width: 100%;
+  min-height: 256px;
   background: var(--bg);
   border: 1.5px solid var(--accent);
   border-radius: 10px;
@@ -48,6 +52,8 @@
   font-size: 16px;
   font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   color: var(--text-primary);
+  line-height: 1.5;
+  resize: none;
   outline: none;
   transition: box-shadow 120ms ease;
 }
@@ -60,11 +66,10 @@
   box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.10);
 }
 
-/* Note capture: thoughts need more room than a one-line title */
+/* Note capture: grows to fill the fixed-height modal instead of a fixed size */
 .noteInput {
-  min-height: 140px;
-  line-height: 1.5;
-  resize: vertical;
+  flex: 1;
+  min-height: 260px;
 }
 
 /* ── Date / Time grid ── */
@@ -322,11 +327,16 @@
 }
 
 /* ── Footer ── */
+/* margin-top: auto pins it to the bottom of the fixed-height modal, so the
+   footer sits in the same place whether the form above is short (task) or
+   fills the space (note). */
 .footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+  flex-shrink: 0;
 }
 
 .footerLeft {

@@ -9,12 +9,22 @@ import styles from './modal.module.css';
 type ModalProps = {
   open: boolean;
   eyebrow: string;
+  eyebrowExtra?: ReactNode;
   onClose: () => void;
   width?: number;
+  height?: number;
   children: ReactNode;
 };
 
-export default function Modal({ open, eyebrow, onClose, width = 480, children }: ModalProps) {
+export default function Modal({
+  open,
+  eyebrow,
+  eyebrowExtra,
+  onClose,
+  width = 480,
+  height = 480,
+  children,
+}: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -30,11 +40,14 @@ export default function Modal({ open, eyebrow, onClose, width = 480, children }:
     <div className={styles.overlay} onClick={onClose}>
       <div
         className={styles.container}
-        style={{ '--modal-width': `${width}px` } as CSSProperties}
+        style={{ '--modal-width': `${width}px`, '--modal-height': `${height}px` } as CSSProperties}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.header}>
-          <span className={styles.eyebrow}>{eyebrow}</span>
+          <div className={styles.headerLeft}>
+            <span className={styles.eyebrow}>{eyebrow}</span>
+            {eyebrowExtra}
+          </div>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             <FontAwesomeIcon icon={faXmark} />
           </button>
