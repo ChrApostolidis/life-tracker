@@ -1,0 +1,325 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 40px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.levelBadge {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1.5px solid rgba(107, 155, 209, 0.4);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.xpMeta {
+  margin-top: 4px;
+  font-size: 14px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+}
+
+.todayXp {
+  color: var(--success);
+}
+
+.xpBarTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.xpBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 400ms ease;
+}
+
+.xpBarLabel {
+  margin-top: 8px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Sections ── */
+.section {
+  margin-top: 32px;
+}
+
+.sectionLabel {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+/* ── Attributes ── */
+.attributesCard {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  flex-wrap: wrap;
+}
+
+.radar {
+  flex-shrink: 0;
+}
+
+.radarRing {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.radarAxis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.radarShape {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.radarLabel {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  fill: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attributesList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.attributeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.attributeLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.attributeValue {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+/* ── Streaks ── */
+.streakGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.streakCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.streakIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.streakBody {
+  min-width: 0;
+}
+
+.streakLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.streakValue {
+  font-size: 22px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.streakUnit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.streakBest {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+.strip {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.stripDay {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.stripDayActive {
+  background: var(--accent);
+}
+
+/* ── Achievements ── */
+.achievementGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.achievement {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  opacity: 0.5;
+}
+
+.achievementUnlocked {
+  opacity: 1;
+  border-color: rgba(107, 155, 209, 0.35);
+}
+
+.achievementIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.achievementUnlocked .achievementIcon {
+  color: var(--accent);
+}
+
+.achievementTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.achievementDesc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.achievementDate {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 80px;
+  }
+
+  .attributesCard {
+    flex-direction: column;
+  }
+
+  .streakGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .achievementGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .achievementGrid {
+    grid-template-columns: 1fr;
+  }
+}

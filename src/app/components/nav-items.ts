@@ -2,6 +2,7 @@ import {
   faCalendarDay,
   faCalendarDays,
   faCalendarWeek,
+  faDiceD20,
   faNoteSticky,
   faTableCellsLarge,
   faWallet,
@@ -24,6 +25,7 @@ export const navItems: NavItem[] = [
   { label: "Year", href: "/year", icon: faTableCellsLarge },
   { label: "Notes", href: "/notes", icon: faNoteSticky },
   { label: "Money", href: "/money", icon: faWallet },
+  { label: "Stats", href: "/stats", icon: faDiceD20 },
 ];
 
 // Exact match or a nested segment (e.g. /week/… still highlights Week).
