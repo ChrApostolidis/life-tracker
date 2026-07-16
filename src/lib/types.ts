@@ -4,30 +4,36 @@ export type Task = {
   title: string;
   scheduledAt: string | null;       // null = inbox / unscheduled
   durationMin: number | null;
-  recurrence: Recurrence | null;
-  recurrenceDay: number | null;     // 0–6 for weekly
+  recurrence: Recurrence | null;    // non-null = this row is a series template
+  recurrenceDay: number | null;     // 0 (Sun) – 6 (Sat) for weekly
   recurrenceUntil: string | null;
-  completedAt: string | null;       // null = not done
+  completedAt: string | null;       // null = not done. Always null on a raw template.
   deletedAt: string | null;         // non-null = soft-deleted
   source: 'text' | 'voice';
   rawTranscript: string | null;
   createdAt: string;
   updatedAt: string;
+  occurrenceDate: string | null;
 };
 
-// Payload for POST /api/tasks. Server sets id/createdAt/updatedAt.
+// Payload for POST /api/tasks. Server sets id/createdAt/updatedAt. Recurring
+// tasks (recurrence set) require scheduledAt — it anchors the whole series.
 export type TaskInput = {
   title: string;
   scheduledAt: string | null;
   durationMin?: number | null;
+  recurrence?: Recurrence | null;
+  recurrenceDay?: number | null;
+  recurrenceUntil?: string | null;
   source?: 'text' | 'voice';
   rawTranscript?: string | null; // original speech-to-text, kept after edits
 };
 
 // Payload for PATCH /api/tasks/{id}. Only these fields are applied server-side,
-// and null means "leave unchanged" — you cannot clear a field via PATCH.
+// and null means "leave unchanged" — you cannot clear a field via PATCH. On a
+// recurring template this edits the whole series — no per-occurrence edits.
 export type TaskPatch = Partial<
-  Pick<Task, 'title' | 'scheduledAt' | 'durationMin' | 'recurrence'>
+  Pick<Task, 'title' | 'scheduledAt' | 'durationMin' | 'recurrence' | 'recurrenceDay' | 'recurrenceUntil'>
 >;
 
 // Mirrors the backend notes entity. taskId is null for standalone notes

@@ -1,6 +1,11 @@
 import { formatTimeLabel } from "./date";
 import { Task } from "./types";
 
+
+export function taskKey(t: Task): string {
+  return t.occurrenceDate ? `${t.id}:${t.occurrenceDate}` : t.id;
+}
+
 function timeToMins(hhmm: string): number {
   const [h, m] = hhmm.split(':').map(Number);
   return h * 60 + m;
@@ -18,7 +23,7 @@ export function getNowId(scheduled: Task[], now: Date): string | null {
       i + 1 < sorted.length
         ? timeToMins(formatTimeLabel(sorted[i + 1].scheduledAt!))
         : start + 120;
-    if (mins >= start && mins < end) return sorted[i].id;
+    if (mins >= start && mins < end) return taskKey(sorted[i]);
   }
   return null;
 }

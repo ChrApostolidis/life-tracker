@@ -99,6 +99,16 @@ export function formatWeekRange(weekStart: Date): string {
   return `${weekStart.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}`;
 }
 
+// ISO string (in the past) → compact age for narrow columns: "<1d" / "2d" / "3w" / "5mo"
+export function formatAgeShort(iso: string): string {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (days < 1) return '<1d';
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks}w`;
+  return `${Math.floor(days / 30)}mo`;
+}
+
 // ISO string → "just now" / "5m ago" / "2h ago" / "3d ago" / "Jun 30"
 export function formatRelativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
