@@ -9,7 +9,7 @@ import VoiceConfirm from './VoiceConfirm';
 import { useApp } from '@/lib/app-context';
 import { combineDateTime, splitDateTime, toDateInput } from '@/lib/date';
 import { useSpeechRecognition } from '@/lib/use-speech-recognition';
-import type { Note, Task } from '@/lib/types';
+import type { Note, Recurrence, Task } from '@/lib/types';
 import styles from './captureModal.module.css';
 
 type CaptureKind = 'task' | 'note';
@@ -129,6 +129,9 @@ function CaptureForm({
     task?.scheduledAt ? new Date(task.scheduledAt) : prefillDate,
   );
   const [time, setTime] = useState(task?.scheduledAt ? splitDateTime(task.scheduledAt).time : '');
+  const [recurrence, setRecurrence] = useState<Recurrence | null>(task?.recurrence ?? null);
+ 
+  const isExistingRecurring = isTaskEdit && task?.recurrence != null;
 
   // ── Voice capture (speech-to-text only; no audio is recorded or stored) ──
   const speech = useSpeechRecognition();
@@ -195,13 +198,15 @@ function CaptureForm({
     // A date alone schedules the task; the time is optional and defaults to the
     // start of the day. Without a date the task stays unscheduled (inbox).
     const scheduledAt = date ? combineDateTime(toDateInput(date), time || '00:00') : null;
+    // Weekly derives its weekday from the picked date — 0 (Sun)–6 (Sat), same
+    // convention the backend expects, no separate day picker needed.
+    const recurrenceDay = recurrence === 'weekly' && date ? date.getDay() : null;
 
     if (isTaskEdit && task) {
-      // Note: PATCH can't clear scheduledAt, so blanking the date here leaves
-      // the task scheduled server-side; un-scheduling needs a backend change.
-      void updateTask(task.id, { title: trimmedTitle, scheduledAt });
+   
+      void updateTask(task.id, { title: trimmedTitle, scheduledAt, recurrence, recurrenceDay });
     } else {
-      void addTask({ title: trimmedTitle, scheduledAt });
+      void addTask({ title: trimmedTitle, scheduledAt, recurrence, recurrenceDay });
     }
     onSaved();
   }
@@ -232,6 +237,25 @@ function CaptureForm({
 
       {!noteMode && (
         <DateTimeFields date={date} time={time} onDateChange={setDate} onTimeChange={setTime} />
+      )}
+
+      {!noteMode && date && (
+        <div className={styles.field}>
+          <label className={styles.fieldLabel}>Repeat</label>
+          <select
+            className={styles.timeInput}
+            value={recurrence ?? ''}
+            onChange={(e) => setRecurrence((e.target.value || null) as Recurrence | null)}
+          >
+            {!isExistingRecurring && <option value="">None</option>}
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          {isExistingRecurring && (
+            <span className={styles.recurHint}>Changes apply to the whole series</span>
+          )}
+        </div>
       )}
 
       {speech.error && <div className={styles.voiceError}>{speech.error}</div>}

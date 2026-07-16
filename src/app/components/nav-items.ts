@@ -3,6 +3,7 @@ import {
   faCalendarDays,
   faCalendarWeek,
   faDiceD20,
+  faHouse,
   faNoteSticky,
   faTableCellsLarge,
   faWallet,
@@ -19,7 +20,8 @@ export type NavItem = {
 // Shared by the sidebar and the mobile top bar so route titles stay in sync.
 // Inbox is intentionally omitted until the /inbox route exists.
 export const navItems: NavItem[] = [
-  { label: "Today", href: "/", icon: faCalendarDay },
+  { label: "Home", href: "/", icon: faHouse },
+  { label: "Today", href: "/today", icon: faCalendarDay },
   { label: "Week", href: "/week", icon: faCalendarWeek },
   { label: "Month", href: "/month", icon: faCalendarDays },
   { label: "Year", href: "/year", icon: faTableCellsLarge },

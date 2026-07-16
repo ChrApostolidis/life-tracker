@@ -2,11 +2,11 @@
 
 import { useState, useEffect, type MouseEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTrash, faPlus, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
-import { isSameDay, formatDate, formatTimeLabel, startOfDay, addDays } from '@/lib/date';
+import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays } from '@/lib/date';
 import type { Task } from '@/lib/types';
-import { getNowId } from '@/lib/helpers';
+import { getNowId, taskKey } from '@/lib/helpers';
 import styles from './dayView.module.css';
 
 // ── Timeline Row ───────────────────────────────────────────────────────────
@@ -15,12 +15,13 @@ type RowProps = {
   task: Task;
   timeLabel: string;
   now?: boolean;
-  onToggle: (id: string) => void;
+  overdue?: boolean;
+  onToggle: (task: Task) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
 };
 
-function TimelineRow({ task, timeLabel, now, onToggle, onEdit, onDelete }: RowProps) {
+function TimelineRow({ task, timeLabel, now, overdue, onToggle, onEdit, onDelete }: RowProps) {
   const done = Boolean(task.completedAt);
 
   const rowClass = [styles.row, now ? styles.rowNow : ''].filter(Boolean).join(' ');
@@ -34,12 +35,12 @@ function TimelineRow({ task, timeLabel, now, onToggle, onEdit, onDelete }: RowPr
   ].filter(Boolean).join(' ');
   const timeClass = [
     styles.time,
-    now && !done ? styles.timeNow : styles.timeMuted,
+    overdue && !done ? styles.timeOverdue : now && !done ? styles.timeNow : styles.timeMuted,
   ].join(' ');
 
   function handleDotClick(e: MouseEvent) {
     e.stopPropagation();
-    onToggle(task.id);
+    onToggle(task);
   }
 
   function handleDeleteClick(e: MouseEvent) {
@@ -68,6 +69,9 @@ function TimelineRow({ task, timeLabel, now, onToggle, onEdit, onDelete }: RowPr
       </button>
       <div className={titleClass}>{task.title}</div>
       <div className={styles.indicators}>
+        {task.recurrence && (
+          <FontAwesomeIcon icon={faRepeat} className={styles.recurIcon} title="Repeats" />
+        )}
         {now && !done && <span className={styles.nowBadge}>NOW</span>}
         <button
           type="button"
@@ -88,8 +92,17 @@ const byScheduledAsc = (a: Task, b: Task) =>
   new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime();
 
 export default function DayView({ date }: { date: Date }) {
-  const { tasks, loading, error, toggleComplete, openEdit, openCapture, deleteTask, setRange } =
-    useApp();
+  const {
+    tasks,
+    overdueTasks,
+    loading,
+    error,
+    toggleComplete,
+    openEdit,
+    openCapture,
+    deleteTask,
+    setRange,
+  } = useApp();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -117,6 +130,9 @@ export default function DayView({ date }: { date: Date }) {
   ];
 
   const nowId = isToday ? getNowId(scheduled, now) : null;
+  // Overdue is range-independent (fetched separately in context), so it only
+  // makes sense to surface on Today — a past day already shows its own history.
+  const overdue = isToday ? overdueTasks : [];
 
   const allVisible = [...unscheduled, ...scheduled];
   const doneCount = allVisible.filter((t) => t.completedAt).length;
@@ -144,13 +160,34 @@ export default function DayView({ date }: { date: Date }) {
 
       {error && <div className={styles.empty}>{error}</div>}
 
+      {overdue.length > 0 && (
+        <section className={styles.section}>
+          <div className={[styles.sectionLabel, styles.sectionLabelOverdue].join(' ')}>
+            Overdue · {overdue.length}
+          </div>
+          <div>
+            {overdue.map((task) => (
+              <TimelineRow
+                key={taskKey(task)}
+                task={task}
+                timeLabel={formatAgeShort(task.scheduledAt!)}
+                overdue
+                onToggle={toggleComplete}
+                onEdit={openEdit}
+                onDelete={deleteTask}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {unscheduled.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionLabel}>Unscheduled</div>
           <div>
             {unscheduled.map((task) => (
               <TimelineRow
-                key={task.id}
+                key={taskKey(task)}
                 task={task}
                 timeLabel="—"
                 onToggle={toggleComplete}
@@ -169,10 +206,10 @@ export default function DayView({ date }: { date: Date }) {
             <div className={styles.timelineRule} />
             {sortedScheduled.map((task) => (
               <TimelineRow
-                key={task.id}
+                key={taskKey(task)}
                 task={task}
                 timeLabel={formatTimeLabel(task.scheduledAt!)}
-                now={task.id === nowId}
+                now={taskKey(task) === nowId}
                 onToggle={toggleComplete}
                 onEdit={openEdit}
                 onDelete={deleteTask}
@@ -182,7 +219,7 @@ export default function DayView({ date }: { date: Date }) {
         </section>
       )}
 
-      {totalTasks === 0 && !error && (
+      {totalTasks === 0 && overdue.length === 0 && !error && (
         <div className={styles.empty}>
           {loading ? 'Loading…' : 'Nothing scheduled. Add a task to get started.'}
         </div>
