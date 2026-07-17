@@ -54,11 +54,16 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
 export const api = {
   // Range views: scheduledAt in half-open [from, to), excludes inbox, includes
   // completed, sorted by scheduledAt asc. `from`/`to` are ISO instants.
+  // Includes expanded occurrences of recurring templates, merged in.
   listRange: (from: string, to: string) =>
     request<Task[]>(`/api/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
 
   // scheduledAt IS NULL AND deletedAt IS NULL
   listInbox: () => request<Task[]>('/api/inbox'),
+
+  // scheduledAt < start of today, not completed, not deleted, not recurring
+  // (a missed recurring occurrence recurs again — it doesn't carry over).
+  listOverdue: () => request<Task[]>('/api/tasks/overdue'),
 
   create: (input: TaskInput) => request<Task>('/api/tasks', { method: 'POST', body: input }),
 
@@ -70,6 +75,13 @@ export const api = {
 
   complete: (id: string) => request<Task>(`/api/tasks/${id}/complete`, { method: 'POST' }),
   uncomplete: (id: string) => request<Task>(`/api/tasks/${id}/uncomplete`, { method: 'POST' }),
+
+  // Recurring-series occurrences: `id` is the template's id, `date` a
+  // 'YYYY-MM-DD' that must be a real occurrence date of that series.
+  completeOccurrence: (id: string, date: string) =>
+    request<Task>(`/api/tasks/${id}/occurrences/${date}/complete`, { method: 'POST' }),
+  uncompleteOccurrence: (id: string, date: string) =>
+    request<Task>(`/api/tasks/${id}/occurrences/${date}/uncomplete`, { method: 'POST' }),
 
   // Standalone notes (taskId IS NULL), newest first.
   listNotes: () => request<Note[]>('/api/notes'),

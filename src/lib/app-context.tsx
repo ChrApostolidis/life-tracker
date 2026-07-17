@@ -12,6 +12,7 @@ import {
 import type { Note, NoteInput, NotePatch, Task, TaskInput, TaskPatch } from './types';
 import { api, describeError } from './api';
 import { startOfDay, addDays } from './date';
+import { taskKey } from './helpers';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -27,16 +28,15 @@ type DateRange = { from: string; to: string }; // half-open [from, to) ISO insta
 type AppCtx = {
   tasks: Task[];
   notes: Note[];
+  overdueTasks: Task[];
   loading: boolean;
   error: string | null;
-  // Bumped after every task mutation so range-independent consumers (e.g. the
-  // sidebar Today ring) can refetch without sharing the page's date window.
   taskRevision: number;
   refresh: () => Promise<void>;
   setRange: (from: string, to: string) => void;
   addTask: (input: TaskInput) => Promise<void>;
   updateTask: (id: string, patch: TaskPatch) => Promise<void>;
-  toggleComplete: (id: string) => Promise<void>;
+  toggleComplete: (task: Task) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   addNote: (input: NoteInput) => Promise<void>;
   updateNote: (id: string, patch: NotePatch) => Promise<void>;
@@ -70,6 +70,7 @@ function cleanPatch(patch: TaskPatch): TaskPatch {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [overdueTasks, setOverdueTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [taskRevision, setTaskRevision] = useState(0);
@@ -100,29 +101,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
+  const overdueTasksRef = useRef<Task[]>(overdueTasks);
+  useEffect(() => {
+    overdueTasksRef.current = overdueTasks;
+  }, [overdueTasks]);
 
-  // Load the current window's scheduled tasks + the inbox + standalone notes.
-  // The range query excludes scheduledAt IS NULL, so the inbox separately feeds
-  // the Unscheduled section (shown on the Today view only).
+
+  // Refresh the full visible window (tasks + notes + overdue) from the server.
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [scheduled, inbox, standaloneNotes] = await Promise.all([
+      const [scheduled, inbox, standaloneNotes, overdue] = await Promise.all([
         api.listRange(range.from, range.to),
         api.listInbox(),
         api.listNotes(),
+        api.listOverdue(),
       ]);
-      const byId = new Map<string, Task>();
-      [...scheduled, ...inbox].forEach((t) => byId.set(t.id, t));
-      setTasks([...byId.values()]);
+      const byKey = new Map<string, Task>();
+      [...scheduled, ...inbox].forEach((t) => byKey.set(taskKey(t), t));
+      setTasks([...byKey.values()]);
       setNotes(standaloneNotes);
+      setOverdueTasks(overdue);
     } catch (e) {
       setError(describeError(e, 'Could not load tasks'));
     } finally {
       setLoading(false);
     }
   }, [range]);
+
+  // Lighter-weight than refresh() — re-fetches just the overdue list after an
+  // edit that might change a task's overdue status (e.g. rescheduling it).
+  const refreshOverdue = useCallback(async () => {
+    try {
+      setOverdueTasks(await api.listOverdue());
+    } catch {
+      console.error('Could not refresh overdue tasks');
+    }
+  }, []);
 
   useEffect(() => {
     // Reload whenever the window changes; refresh() owns its loading/error state.
@@ -138,73 +154,110 @@ export function AppProvider({ children }: { children: ReactNode }) {
       title: input.title,
       scheduledAt: input.scheduledAt,
       durationMin: input.durationMin ?? null,
-      recurrence: null,
-      recurrenceDay: null,
-      recurrenceUntil: null,
+      recurrence: input.recurrence ?? null,
+      recurrenceDay: input.recurrenceDay ?? null,
+      recurrenceUntil: input.recurrenceUntil ?? null,
       completedAt: null,
       deletedAt: null,
       source: input.source ?? 'text',
       rawTranscript: input.rawTranscript ?? null,
       createdAt: nowIso,
       updatedAt: nowIso,
+      occurrenceDate: null,
     };
     setTasks((prev) => [...prev, optimistic]);
     try {
       const created = await api.create(input);
-      setTasks((prev) => prev.map((t) => (t.id === tempId ? created : t)));
+      if (input.recurrence) {
+        // A new series needs the whole visible window re-expanded — swapping
+        // in just the template row would only show its first occurrence.
+        await refresh();
+      } else {
+        setTasks((prev) => prev.map((t) => (t.id === tempId ? created : t)));
+      }
       bumpTasks();
     } catch (e) {
       setTasks((prev) => prev.filter((t) => t.id !== tempId));
       setError(describeError(e, 'Could not add task'));
     }
-  }, [bumpTasks]);
+  }, [bumpTasks, refresh]);
 
   const updateTask = useCallback(async (id: string, patch: TaskPatch) => {
     const clean = cleanPatch(patch);
     const snapshot = tasksRef.current;
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...clean } : t)));
+    const isRecurringEdit = tasksRef.current.some((t) => t.id === id && t.recurrence);
+    if (!isRecurringEdit) {
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...clean } : t)));
+    }
     try {
       const updated = await api.update(id, clean);
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      if (isRecurringEdit) {
+        await refresh();
+      } else {
+        setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+        void refreshOverdue(); // scheduledAt may have moved the task off (or onto) the overdue list
+      }
       bumpTasks();
     } catch (e) {
       setTasks(snapshot);
       setError(describeError(e, 'Could not update task'));
     }
-  }, [bumpTasks]);
+  }, [bumpTasks, refresh, refreshOverdue]);
 
-  const toggleComplete = useCallback(async (id: string) => {
-    const task = tasksRef.current.find((t) => t.id === id);
-    if (!task) return;
+
+
+  // Takes the full task (not just an id): completing an occurrence of a recurring series needs its occurrenceDate to route to the right endpoint.
+  const toggleComplete = useCallback(async (task: Task) => {
+    const key = taskKey(task);
     const wasDone = Boolean(task.completedAt);
-    const snapshot = tasksRef.current;
+    const tasksSnapshot = tasksRef.current;
+    const overdueSnapshot = overdueTasksRef.current;
+    const nowIso = new Date().toISOString();
+
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, completedAt: wasDone ? null : new Date().toISOString() } : t,
-      ),
+      prev.map((t) => (taskKey(t) === key ? { ...t, completedAt: wasDone ? null : nowIso } : t)),
     );
+ 
+    if (!wasDone) 
+    {
+      setOverdueTasks((prev) => prev.filter((t) => taskKey(t) !== key));
+    }
+
     try {
-      const updated = wasDone ? await api.uncomplete(id) : await api.complete(id);
-      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      const updated = task.occurrenceDate
+        ? wasDone
+          ? await api.uncompleteOccurrence(task.id, task.occurrenceDate)
+          : await api.completeOccurrence(task.id, task.occurrenceDate)
+        : wasDone
+          ? await api.uncomplete(task.id)
+          : await api.complete(task.id);
+      setTasks((prev) => prev.map((t) => (taskKey(t) === key ? updated : t)));
       bumpTasks();
     } catch (e) {
-      setTasks(snapshot);
+      setTasks(tasksSnapshot);
+      setOverdueTasks(overdueSnapshot);
       setError(describeError(e, 'Could not update task'));
     }
   }, [bumpTasks]);
 
+
+  // Delete a task. If it's a recurring series, the backend will delete all occurrences in the visible window.
   const deleteTask = useCallback(async (id: string) => {
     const snapshot = tasksRef.current;
+    const overdueSnapshot = overdueTasksRef.current;
     setTasks((prev) => prev.filter((t) => t.id !== id));
+    setOverdueTasks((prev) => prev.filter((t) => t.id !== id));
     try {
       await api.remove(id);
       bumpTasks();
     } catch (e) {
       setTasks(snapshot);
+      setOverdueTasks(overdueSnapshot);
       setError(describeError(e, 'Could not delete task'));
     }
   }, [bumpTasks]);
 
+  // Add a new note.
   const addNote = useCallback(async (input: NoteInput) => {
     const tempId = `temp-note-${Date.now()}`;
     const nowIso = new Date().toISOString();
@@ -252,6 +305,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Promote a note to a task. The backend will delete the note and return the new task.
   const promoteNote = useCallback(async (id: string) => {
     const noteSnapshot = notesRef.current;
     const taskSnapshot = tasksRef.current;
@@ -306,6 +360,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         tasks,
         notes,
+        overdueTasks,
         loading,
         error,
         taskRevision,
