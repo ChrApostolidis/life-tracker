@@ -3,7 +3,7 @@
 import { useState, useEffect, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faChevronRight, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import {
   startOfWeek,
@@ -13,7 +13,7 @@ import {
   toDateInput,
   formatWeekRange,
 } from '@/lib/date';
-import { getNowId } from '@/lib/helpers';
+import { getNowId, taskKey } from '@/lib/helpers';
 import PeriodNav from '@/app/components/PeriodNav';
 import type { Task } from '@/lib/types';
 import styles from './week.module.css';
@@ -42,6 +42,9 @@ function TaskPill({ task, now, onEdit, onDelete }: PillProps) {
       }}
     >
       <span className={styles.pillTitle}>{task.title}</span>
+      {task.recurrence && (
+        <FontAwesomeIcon icon={faRepeat} className={styles.pillRecur} title="Repeats" />
+      )}
       <button
         type="button"
         className={styles.pillDelete}
@@ -141,9 +144,9 @@ export default function WeekPage() {
               <div className={styles.pills}>
                 {dayTasks(day).map((task) => (
                   <TaskPill
-                    key={task.id}
+                    key={taskKey(task)}
                     task={task}
-                    now={isToday && task.id === nowId}
+                    now={isToday && taskKey(task) === nowId}
                     onEdit={openEdit}
                     onDelete={deleteTask}
                   />

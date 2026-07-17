@@ -158,6 +158,17 @@
   color: var(--bg);
 }
 
+.pillRecur {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.pillNow .pillRecur {
+  color: var(--bg);
+}
+
 /* Hover-trash — width reserved so the title never shifts */
 .pillDelete {
   width: 14px;
