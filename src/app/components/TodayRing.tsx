@@ -24,7 +24,7 @@ export default function TodayRing() {
     total === 0 ? 'No tasks today' : complete ? 'All done today' : `${done} of ${total} done`;
 
   return (
-    <Link href="/" className={styles.wrap} aria-label={`Today, ${label}`}>
+    <Link href="/today" className={styles.wrap} aria-label={`Today, ${label}`}>
       <div className={styles.ring}>
         <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
           <circle

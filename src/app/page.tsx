@@ -18,7 +18,7 @@ import {
 import { useApp } from '@/lib/app-context';
 import { useGameData } from '@/lib/use-game-data';
 import { formatTimeLabel, startOfDay, addDays } from '@/lib/date';
-import { greetingWord, pickFlavorLine, pickQuote } from '@/lib/home-copy';
+import { greetingWord, pickFlavorLine, pickQuote } from '@/lib/quotes';
 import styles from './home.module.css';
 
 // Kept intentionally close to the app's actual name — a single-user app
