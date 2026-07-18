@@ -1,4 +1,7 @@
 import type {
+  Book,
+  BookInput,
+  BookPatch,
   MoneyBalance,
   MoneyEntry,
   MoneyEntryInput,
@@ -83,8 +86,10 @@ export const api = {
   uncompleteOccurrence: (id: string, date: string) =>
     request<Task>(`/api/tasks/${id}/occurrences/${date}/uncomplete`, { method: 'POST' }),
 
-  // Standalone notes (taskId IS NULL), newest first.
-  listNotes: () => request<Note[]>('/api/notes'),
+  // Standalone notes (taskId and bookId both NULL), newest first. Pass a
+  // bookId to fetch that book's thought stream instead.
+  listNotes: (bookId?: string) =>
+    request<Note[]>(`/api/notes${bookId ? `?bookId=${encodeURIComponent(bookId)}` : ''}`),
 
   createNote: (input: NoteInput) => request<Note>('/api/notes', { method: 'POST', body: input }),
 
@@ -110,4 +115,14 @@ export const api = {
 
   // All-time { earnedCents, spentCents } — the piggy bank balance.
   moneyBalance: () => request<MoneyBalance>('/api/money/balance'),
+
+  // Books: all non-deleted, newest first. No range — single user, tiny data.
+  listBooks: () => request<Book[]>('/api/books'),
+
+  createBook: (input: BookInput) => request<Book>('/api/books', { method: 'POST', body: input }),
+
+  updateBook: (id: string, patch: BookPatch) =>
+    request<Book>(`/api/books/${id}`, { method: 'PATCH', body: patch }),
+
+  removeBook: (id: string) => request<void>(`/api/books/${id}`, { method: 'DELETE' }),
 };

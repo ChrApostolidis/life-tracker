@@ -37,10 +37,13 @@ export type TaskPatch = Partial<
 >;
 
 // Mirrors the backend notes entity. taskId is null for standalone notes
-// (the /notes library); non-null is reserved for task-attached notes.
+// (the /notes library); non-null is reserved for task-attached notes. bookId
+// is non-null for one entry in a book's thought stream (see Book below) —
+// mutually exclusive with taskId in practice, though nothing enforces that.
 export type Note = {
   id: string;
   taskId: string | null;
+  bookId: string | null;
   body: string;
   source: 'text' | 'voice';
   rawTranscript: string | null;
@@ -57,6 +60,7 @@ export type NoteInput = {
   body: string;
   source?: 'text' | 'voice';
   rawTranscript?: string | null; // original speech-to-text, kept after edits
+  bookId?: string | null;
 };
 
 export type MoneyEntryType = 'expense' | 'income';
@@ -96,3 +100,40 @@ export type MoneyBalance = {
   earnedCents: number;
   spentCents: number;
 };
+
+// Pipeline: wishlist (want to buy) -> owned (bought) -> reading -> finished.
+export type BookStatus = 'wishlist' | 'owned' | 'reading' | 'finished';
+
+// Mirrors the backend books entity. startedOn/finishedOn are local
+// 'YYYY-MM-DD' calendar days, auto-stamped by the backend when status moves
+// to reading/finished and the field is still empty.
+export type Book = {
+  id: string;
+  title: string;
+  author: string | null;
+  status: BookStatus;
+  startedOn: string | null;
+  finishedOn: string | null;
+  rating: number | null; // 1–5, only meaningful once status is 'finished'
+  coverUrl: string | null;
+  notes: string | null; // legacy single-field notes; superseded by the per-book Note[] "thoughts" stream (Note.bookId)
+  deletedAt: string | null; // non-null = soft-deleted
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Payload for POST /api/books. Server sets id/createdAt/updatedAt — a freshly
+// added book has no dates/rating/notes yet.
+export type BookInput = {
+  title: string;
+  author?: string | null;
+  status: BookStatus;
+  coverUrl?: string | null;
+};
+
+// Payload for PATCH /api/books/{id} — null/absent = leave unchanged (same
+// convention as tasks/money). Status auto-stamps dates server-side; send
+// startedOn/finishedOn explicitly in the same patch to override that.
+export type BookPatch = Partial<
+  Pick<Book, 'title' | 'author' | 'status' | 'startedOn' | 'finishedOn' | 'rating' | 'notes' | 'coverUrl'>
+>;

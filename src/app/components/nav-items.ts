@@ -1,4 +1,5 @@
 import {
+  faBook,
   faCalendarDay,
   faCalendarDays,
   faCalendarWeek,
@@ -27,6 +28,7 @@ export const navItems: NavItem[] = [
   { label: "Year", href: "/year", icon: faTableCellsLarge },
   { label: "Notes", href: "/notes", icon: faNoteSticky },
   { label: "Money", href: "/money", icon: faWallet },
+  { label: "Books", href: "/books", icon: faBook },
   { label: "Stats", href: "/stats", icon: faDiceD20 },
 ];
 
