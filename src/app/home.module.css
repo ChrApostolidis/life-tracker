@@ -232,6 +232,133 @@
   height: 11px;
 }
 
+/* ── Books showcase ── */
+.booksCard {
+  display: block;
+  position: relative;
+  z-index: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.booksCard:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+
+.booksHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.booksEmptyLine {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.booksBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.booksReading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.booksReadingCover,
+.booksStripCover {
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.booksReadingCover {
+  width: 40px;
+  height: 60px;
+}
+
+.booksStripCover {
+  width: 28px;
+  height: 42px;
+}
+
+/* The fallback icon box (a <div>) needs a background/border the real <img>
+   doesn't — same class name serves both, so the element type disambiguates. */
+div.booksReadingCover,
+div.booksStripCover {
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.booksThumbIcon {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.booksReadingInfo {
+  min-width: 0;
+}
+
+.booksReadingTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booksReadingAuthor {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booksReadingSub {
+  margin-top: 2px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.booksStrip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.booksMore {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.booksFooter {
+  margin-top: 12px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
 /* ── Quick menu tiles ── */
 .tiles {
   position: relative;
