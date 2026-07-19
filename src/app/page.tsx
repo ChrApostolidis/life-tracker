@@ -105,7 +105,20 @@ export default function HomePage() {
       <div className={styles.glow} />
 
       <header className={styles.hero}>
-        <div className={styles.eyebrow}>{dateLabel}</div>
+       <div className={styles.headerTop}>
+          <div className={styles.eyebrow}>{dateLabel}</div>
+          <div className={styles.footer}>
+            <span>
+              Day {dayOfYearNum} · {yearPct}% of {now.getFullYear()}
+            </span>
+            {unscheduled.length > 0 && (
+              <span className={styles.inboxChip}>
+                <FontAwesomeIcon icon={faInbox} className={styles.inboxIcon} />
+                {unscheduled.length} in inbox
+              </span>
+            )}
+          </div>
+       </div>
         <h1 className={styles.greeting}>
           Good {greetingWord(now)}, {USER_NAME}.
         </h1>
@@ -248,17 +261,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-      <div className={styles.footer}>
-        <span>
-          Day {dayOfYearNum} · {yearPct}% of {now.getFullYear()}
-        </span>
-        {unscheduled.length > 0 && (
-          <span className={styles.inboxChip}>
-            <FontAwesomeIcon icon={faInbox} className={styles.inboxIcon} />
-            {unscheduled.length} in inbox
-          </span>
-        )}
-      </div>
+    
     </div>
   );
 }
