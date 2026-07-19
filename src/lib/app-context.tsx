@@ -264,6 +264,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const optimistic: Note = {
       id: tempId,
       taskId: null,
+      bookId: input.bookId ?? null,
       body: input.body,
       source: input.source ?? 'text',
       rawTranscript: input.rawTranscript ?? null,
