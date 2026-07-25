@@ -1,0 +1,367 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Add row ── */
+.addRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.addInput {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+.addInput::placeholder {
+  color: var(--text-muted);
+}
+
+.addInput:focus {
+  border-color: var(--accent);
+}
+
+.addBtn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(107, 155, 209, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 120ms ease;
+}
+
+.addBtn:hover {
+  opacity: 0.85;
+}
+
+.addBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── Checklist ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 0 -12px;
+  border-radius: 8px;
+  transition: background-color 120ms ease;
+}
+
+.row:hover {
+  background: var(--bg-hover);
+}
+
+.rowTop {
+  display: flex;
+  align-items: center;
+}
+
+/* Checkbox toggle — button gives a 44px touch target + keyboard focus
+   without changing the visual dot size (the ::before extends the hit area). */
+.checkboxBtn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.checkboxBtn::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+  border-radius: 999px;
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+}
+
+.checkboxOpen {
+  background: var(--bg);
+  border: 1.5px solid var(--text-muted);
+}
+
+.checkboxChecked {
+  background: var(--success);
+  border: 1.5px solid var(--success);
+}
+
+.checkIcon {
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+}
+
+.checkIcon svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* These repeat daily, so no strikethrough on check — that would read as
+   "finished forever" rather than "done today". */
+.name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.renameInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.streakChip {
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Hover-revealed actions — reserve width so the name never shifts */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+.actionBtn::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+}
+
+.row:hover .actionBtn,
+.actionBtn:focus-visible {
+  opacity: 1;
+}
+
+.actionBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.actionBtn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── 14-day strip ── */
+.strip {
+  display: flex;
+  gap: 3px;
+  margin-left: 34px;
+}
+
+.stripDay {
+  width: 16px;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.stripDayChecked {
+  background: var(--accent);
+}
+
+.stripDayToday {
+  box-shadow: 0 0 0 1.5px var(--text-primary);
+}
+
+/* ── Archived ── */
+.archivedSection {
+  margin-top: 32px;
+}
+
+.archivedLabel {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.archivedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.archivedRow:first-child {
+  border-top: none;
+}
+
+.archivedName {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.unarchiveBtn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.unarchiveBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+/* ── Empty state ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.empty p {
+  margin: 0;
+}
+
+.emptyIcon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ── Touch: reveal hover-gated actions ── */
+@media (hover: none) {
+  .actionBtn {
+    opacity: 1;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 80px;
+  }
+
+  .addBtn {
+    min-height: 44px;
+  }
+
+  .strip {
+    margin-left: 34px;
+  }
+
+  .stripDay {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+}
