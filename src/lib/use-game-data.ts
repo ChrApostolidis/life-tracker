@@ -26,11 +26,12 @@ export function useGameData(): State {
         const now = new Date();
         const from = HISTORY_START.toISOString();
         const to = toDateInput(addDays(now, 1));
-        const [scheduled, inbox, notes, money] = await Promise.all([
+        const [scheduled, inbox, notes, money, habitChecks] = await Promise.all([
           api.listRange(from, addDays(now, 1).toISOString()),
           api.listInbox(),
           api.listNotes(),
           api.listMoney(toDateInput(HISTORY_START), to),
+          api.listHabitChecks(toDateInput(HISTORY_START), to),
         ]);
 
         const byKey = new Map<string, Task>();
@@ -42,7 +43,7 @@ export function useGameData(): State {
         setState({
           loading: false,
           error: null,
-          game: computeGameState({ tasks, notes, money, inboxCount, now }),
+          game: computeGameState({ tasks, notes, money, habitChecks, inboxCount, now }),
         });
       } catch (e) {
         if (!cancelled) setState({ loading: false, error: describeError(e, 'Could not load stats'), game: null });

@@ -2,7 +2,7 @@
 // levels, streaks, attributes, and achievements. No stored game state — every
 // number here is re-derived from the same data the rest of the app already
 // shows, so there's nothing to desync or cheat.
-import type { MoneyEntry, Note, Task } from './types';
+import type { HabitCheck, MoneyEntry, Note, Task } from './types';
 import { addDays, fromDateInput, toDateInput } from './date';
 
 // ── XP economy (tune here) ──────────────────────────────────────────────────
@@ -20,6 +20,8 @@ export const XP = {
   streak7: 50,
   streak30: 200,
   streak100: 1000,
+  habitCheck: 4,
+  habitCheckXpCapPerDay: 5, // anti-cheese: 20 habits checked in a day still earns 5×4
 } as const;
 
 const LEVEL_TITLES: { minLevel: number; title: string }[] = [
@@ -57,7 +59,10 @@ export type AchievementId =
   | 'speedrunner'
   | 'comeback'
   | 'theMachine'
-  | 'inboxZero';
+  | 'inboxZero'
+  | 'habitFormed'
+  | 'ironWill'
+  | 'steadyHand';
 
 export type Achievement = {
   id: AchievementId;
@@ -76,7 +81,7 @@ export type GameState = {
   xpIntoLevel: number;
   xpForNextLevel: number;
   xpProgress: number; // 0–1
-  streaks: { active: StreakInfo; money: StreakInfo; journal: StreakInfo };
+  streaks: { active: StreakInfo; money: StreakInfo; journal: StreakInfo; habit: StreakInfo };
   recentDays: RecentDay[]; // last 14 days, oldest first, for the streak strip
   attributes: Attributes;
   achievements: Achievement[];
@@ -86,6 +91,7 @@ export type GameInput = {
   tasks: Task[];
   notes: Note[];
   money: MoneyEntry[];
+  habitChecks: HabitCheck[];
   inboxCount: number;
   now: Date;
 };
@@ -133,6 +139,12 @@ function bestStreakFromRuns(runs: Run[]): number {
   return runs.reduce((max, r) => Math.max(max, r.length), 0);
 }
 
+// Current + best consecutive-day streak over a set of local 'YYYY-MM-DD' keys.
+export function computeStreak(dayKeys: Set<string>, todayKey: string): StreakInfo {
+  const runs = computeRuns(dayKeys);
+  return { current: currentStreakFromRuns(runs, todayKey), best: bestStreakFromRuns(runs) };
+}
+
 // ── Level curve ──────────────────────────────────────────────────────────
 
 function cumulativeXpForLevel(level: number): number {
@@ -156,7 +168,7 @@ function titleForLevel(level: number): string {
 
 // ── Main computation ─────────────────────────────────────────────────────
 
-export function computeGameState({ tasks, notes, money, inboxCount, now }: GameInput): GameState {
+export function computeGameState({ tasks, notes, money, habitChecks, inboxCount, now }: GameInput): GameState {
   const todayKey = toDateInput(now);
 
   const liveTasks = tasks.filter((t) => !t.deletedAt);
@@ -169,6 +181,16 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
   const notesByDay = new Map<string, number>();
   const moneyByDay = new Map<string, { count: number; spentCents: number; earnedCents: number }>();
   const moneyByMonth = new Map<string, { spentCents: number; earnedCents: number }>();
+  const habitChecksByDay = new Map<string, number>();
+  const checksByHabit = new Map<string, Set<string>>();
+
+  for (const c of habitChecks) {
+    habitChecksByDay.set(c.checkedOn, (habitChecksByDay.get(c.checkedOn) ?? 0) + 1);
+    const habitDayKeys = checksByHabit.get(c.habitId) ?? new Set<string>();
+    habitDayKeys.add(c.checkedOn);
+    checksByHabit.set(c.habitId, habitDayKeys);
+  }
+  const habitDays = new Set(habitChecksByDay.keys());
 
   for (const t of liveTasks) {
     if (t.scheduledAt) {
@@ -242,6 +264,7 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
   moneyByMonth.forEach((bucket, monthKey) => {
     if (bucket.earnedCents > bucket.spentCents) addXp(`${monthKey}-01`, XP.positiveMonth);
   });
+  habitChecksByDay.forEach((count, key) => addXp(key, Math.min(count, XP.habitCheckXpCapPerDay) * XP.habitCheck));
   // One milestone award per streak run, at its highest tier reached.
   computeRuns(activeDays).forEach((run) => {
     const tier = run.length >= 100 ? XP.streak100 : run.length >= 30 ? XP.streak30 : run.length >= 7 ? XP.streak7 : 0;
@@ -261,12 +284,13 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
   // ── Streaks ──
   const activeRuns = computeRuns(activeDays);
   const moneyRuns = computeRuns(moneyDays);
-  const journalRuns = computeRuns(journalDays);
+  const habitRuns = computeRuns(habitDays);
 
   const streaks = {
-    active: { current: currentStreakFromRuns(activeRuns, todayKey), best: bestStreakFromRuns(activeRuns) },
-    money: { current: currentStreakFromRuns(moneyRuns, todayKey), best: bestStreakFromRuns(moneyRuns) },
-    journal: { current: currentStreakFromRuns(journalRuns, todayKey), best: bestStreakFromRuns(journalRuns) },
+    active: computeStreak(activeDays, todayKey),
+    money: computeStreak(moneyDays, todayKey),
+    journal: computeStreak(journalDays, todayKey),
+    habit: computeStreak(habitDays, todayKey),
   };
 
   const recentDays: RecentDay[] = Array.from({ length: 14 }, (_, i) => {
@@ -288,8 +312,9 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
   });
   const discipline = schedTotal > 0 ? Math.round((schedCompleted / schedTotal) * 100) : 0;
 
-  const activeDaysInWindow = [...activeDays].filter(inWindow).length;
-  const consistency = Math.round(Math.min(100, (activeDaysInWindow / ATTRIBUTE_WINDOW_DAYS) * 100));
+  const consistencyDays = new Set([...activeDays, ...habitDays]);
+  const consistencyDaysInWindow = [...consistencyDays].filter(inWindow).length;
+  const consistency = Math.round(Math.min(100, (consistencyDaysInWindow / ATTRIBUTE_WINDOW_DAYS) * 100));
 
   const moneyDaysInWindow = [...moneyDays].filter(inWindow).length;
   const moneyCoverage = Math.min(100, (moneyDaysInWindow / ATTRIBUTE_WINDOW_DAYS) * 100);
@@ -352,6 +377,19 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
   });
 
   const comebackRun = activeRuns.length > 1 ? activeRuns.find((r, i) => i > 0 && r.length >= 7) : undefined;
+
+  // Per-habit streaks: earliest qualifying run across all habits, for a
+  // stable unlock date (chronologically first time any single habit hit it).
+  let habitFormedDay: string | null = null;
+  let ironWillDay: string | null = null;
+  checksByHabit.forEach((dayKeys) => {
+    const runs = computeRuns(dayKeys);
+    const formedRun = runs.find((r) => r.length >= 21);
+    if (formedRun && (!habitFormedDay || formedRun.end < habitFormedDay)) habitFormedDay = formedRun.end;
+    const ironRun = runs.find((r) => r.length >= 100);
+    if (ironRun && (!ironWillDay || ironRun.end < ironWillDay)) ironWillDay = ironRun.end;
+  });
+  const steadyHandRun = habitRuns.find((r) => r.length >= 30);
 
   const voiceCandidates = [
     ...liveTasks.filter((t) => t.source === 'voice').map((t) => t.createdAt),
@@ -460,6 +498,24 @@ export function computeGameState({ tasks, notes, money, inboxCount, now }: GameI
       title: 'Inbox Zero',
       description: 'Clear every item out of the inbox',
       unlockedAt: inboxCount === 0 ? now.toISOString() : null,
+    },
+    {
+      id: 'habitFormed',
+      title: 'Habit Formed',
+      description: '21-day streak on a single habit',
+      unlockedAt: habitFormedDay,
+    },
+    {
+      id: 'ironWill',
+      title: 'Iron Will',
+      description: '100-day streak on a single habit',
+      unlockedAt: ironWillDay,
+    },
+    {
+      id: 'steadyHand',
+      title: 'Steady Hand',
+      description: '30 days in a row checking at least one habit',
+      unlockedAt: steadyHandRun?.end ?? null,
     },
   ];
 

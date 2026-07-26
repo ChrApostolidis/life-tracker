@@ -2,6 +2,10 @@ import type {
   Book,
   BookInput,
   BookPatch,
+  Habit,
+  HabitCheck,
+  HabitInput,
+  HabitPatch,
   MoneyBalance,
   MoneyEntry,
   MoneyEntryInput,
@@ -125,4 +129,27 @@ export const api = {
     request<Book>(`/api/books/${id}`, { method: 'PATCH', body: patch }),
 
   removeBook: (id: string) => request<void>(`/api/books/${id}`, { method: 'DELETE' }),
+
+  // Habits: all habits including archived, oldest first. No range — single
+  // user, tiny data; the frontend splits active vs archived.
+  listHabits: () => request<Habit[]>('/api/habits'),
+
+  createHabit: (input: HabitInput) => request<Habit>('/api/habits', { method: 'POST', body: input }),
+
+  updateHabit: (id: string, patch: HabitPatch) =>
+    request<Habit>(`/api/habits/${id}`, { method: 'PATCH', body: patch }),
+
+  archiveHabit: (id: string) => request<void>(`/api/habits/${id}/archive`, { method: 'POST' }),
+  unarchiveHabit: (id: string) => request<void>(`/api/habits/${id}/unarchive`, { method: 'POST' }),
+
+  // Habit checks: checkedOn in half-open [from, to), local 'YYYY-MM-DD' dates.
+  listHabitChecks: (from: string, to: string) =>
+    request<HabitCheck[]>(`/api/habit-checks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
+  // Idempotent: checking an already-checked day just returns the existing row.
+  checkHabit: (id: string, date: string) =>
+    request<HabitCheck>(`/api/habits/${id}/checks/${date}`, { method: 'POST' }),
+
+  uncheckHabit: (id: string, date: string) =>
+    request<void>(`/api/habits/${id}/checks/${date}`, { method: 'DELETE' }),
 };

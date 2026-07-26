@@ -137,3 +137,28 @@ export type BookInput = {
 export type BookPatch = Partial<
   Pick<Book, 'title' | 'author' | 'status' | 'startedOn' | 'finishedOn' | 'rating' | 'notes' | 'coverUrl'>
 >;
+
+// Habits are binary and daily: no time, no schedule, no target. archivedAt
+// hides a habit from the checklists without touching its check history.
+export type Habit = {
+  id: string;
+  name: string;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type HabitInput = { name: string };
+
+// PATCH payload — renaming is the only editable field.
+export type HabitPatch = { name: string };
+
+// One row = "this habit was done on this day". checkedOn is a local
+// 'YYYY-MM-DD' calendar day. Unchecking deletes the row outright (see the
+// backend's HabitService for why this is the one hard-delete in the app).
+export type HabitCheck = {
+  id: string;
+  habitId: string;
+  checkedOn: string;
+  createdAt: string;
+};
