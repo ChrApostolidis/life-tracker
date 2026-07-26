@@ -99,8 +99,7 @@
   border-top: none;
 }
 
-.resultCover,
-.resultCoverIcon {
+.resultCover {
   width: 32px;
   height: 48px;
   flex-shrink: 0;
@@ -108,11 +107,16 @@
   object-fit: cover;
 }
 
-.resultCoverIcon {
+/* The fallback icon box is a <div> sharing .resultCover for sizing; the
+   element-type selector adds the box treatment only the div needs. */
+div.resultCover {
   display: grid;
   place-items: center;
   background: var(--bg);
   border: 1px solid var(--border);
+}
+
+.resultCoverIcon {
   color: var(--text-muted);
   font-size: 12px;
 }
@@ -301,19 +305,23 @@
   height: 12px;
 }
 
-.cover,
-.coverIcon {
+.cover {
   width: 100%;
   aspect-ratio: 2 / 3;
   border-radius: 8px;
   object-fit: cover;
 }
 
-.coverIcon {
+/* The fallback icon box is a <div> sharing .cover for sizing; the
+   element-type selector adds the box treatment only the div needs. */
+div.cover {
   display: grid;
   place-items: center;
   background: var(--bg);
   border: 1px solid var(--border);
+}
+
+.coverIcon {
   color: var(--text-muted);
   font-size: 24px;
 }

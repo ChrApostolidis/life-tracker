@@ -4,7 +4,8 @@ import { useState, useEffect, type MouseEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTrash, faPlus, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
-import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays } from '@/lib/date';
+import { useHabits } from '@/lib/habits-context';
+import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays, toDateInput } from '@/lib/date';
 import type { Task } from '@/lib/types';
 import { getNowId, taskKey } from '@/lib/helpers';
 import styles from './dayView.module.css';
@@ -103,6 +104,7 @@ export default function DayView({ date }: { date: Date }) {
     deleteTask,
     setRange,
   } = useApp();
+  const { habits, isChecked, toggleCheck } = useHabits();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -140,6 +142,11 @@ export default function DayView({ date }: { date: Date }) {
 
   const eyebrow = isToday ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'long' });
 
+  // The date key is used for habit check-ins, which are stored by date string. 
+  const dateKey = toDateInput(date);
+  const activeHabits = habits.filter((h) => !h.archivedAt);
+  const showHabits = activeHabits.length > 0 && startOfDay(date).getTime() <= startOfDay(now).getTime();
+
   return (
     <div className={styles.page}>
       <div className={styles.glow} />
@@ -159,6 +166,41 @@ export default function DayView({ date }: { date: Date }) {
       </header>
 
       {error && <div className={styles.empty}>{error}</div>}
+
+      {showHabits && (
+        <section className={styles.section}>
+          <div className={styles.sectionLabel}>Habits</div>
+          <div className={styles.habitsList}>
+            {activeHabits.map((habit) => {
+              const checked = isChecked(habit.id, dateKey);
+              return (
+                <button
+                  key={habit.id}
+                  type="button"
+                  className={styles.habitRow}
+                  onClick={() => void toggleCheck(habit.id, dateKey)}
+                  role="checkbox"
+                  aria-checked={checked}
+                  aria-label={checked ? `Mark ${habit.name} not done` : `Mark ${habit.name} done`}
+                >
+                  <span
+                    className={[styles.habitCheckbox, checked ? styles.habitCheckboxChecked : '']
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {checked && (
+                      <span className={styles.habitCheckIcon}>
+                        <FontAwesomeIcon icon={faCheck} />
+                      </span>
+                    )}
+                  </span>
+                  <span className={styles.habitName}>{habit.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {overdue.length > 0 && (
         <section className={styles.section}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFire, faLock, faNoteSticky, faTrophy, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { faFire, faListCheck, faLock, faNoteSticky, faTrophy, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { useGameData } from '@/lib/use-game-data';
 import type { Achievement, Attributes, RecentDay, StreakInfo } from '@/lib/game';
 import styles from './stats.module.css';
@@ -68,6 +68,7 @@ export default function StatsPage() {
               <StreakCard icon={faFire} label="Active" streak={game.streaks.active} />
               <StreakCard icon={faWallet} label="Money logged" streak={game.streaks.money} />
               <StreakCard icon={faNoteSticky} label="Journaling" streak={game.streaks.journal} />
+              <StreakCard icon={faListCheck} label="Habits" streak={game.streaks.habit} />
             </div>
             <RecentStrip days={game.recentDays} />
           </section>

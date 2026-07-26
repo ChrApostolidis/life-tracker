@@ -104,6 +104,69 @@
   color: var(--warning);
 }
 
+/* ── Habits (no time column, no NOW badge, no delete — just a check) ── */
+.habitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.habitRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  margin: 0 -16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.habitRow:hover {
+  background: var(--bg-hover);
+}
+
+.habitCheckbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1.5px solid var(--text-muted);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.habitCheckboxChecked {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.habitCheckIcon {
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+}
+
+.habitCheckIcon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.habitName {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Timeline ── */
 .timeline {
   position: relative;
