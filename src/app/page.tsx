@@ -8,9 +8,11 @@ import {
   faCalendarDay,
   faCalendarDays,
   faCalendarWeek,
+  faCheck,
   faDiceD20,
   faFire,
   faInbox,
+  faListCheck,
   faNoteSticky,
   faPlus,
   faTrophy,
@@ -18,11 +20,14 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import { useGameData } from '@/lib/use-game-data';
+import { useHabits } from '@/lib/habits-context';
 import { api } from '@/lib/api';
-import { formatTimeLabel, startOfDay, addDays } from '@/lib/date';
+import { formatTimeLabel, startOfDay, addDays, toDateInput } from '@/lib/date';
 import { greetingWord, pickFlavorLine, pickQuote } from '@/lib/quotes';
 import type { Book } from '@/lib/types';
 import styles from './home.module.css';
+
+const HOME_HABITS_LIMIT = 6;
 
 // Kept intentionally close to the app's actual name — a single-user app
 // doesn't need an account system to say hello.
@@ -32,6 +37,7 @@ const ACHIEVEMENT_RECENT_MS = 48 * 60 * 60 * 1000;
 export default function HomePage() {
   const { tasks, overdueTasks, openCapture, setRange } = useApp();
   const { game } = useGameData();
+  const { habits, loading: habitsLoading, isChecked, toggleCheck } = useHabits();
   const [now, setNow] = useState(() => new Date());
   // null = still loading or the fetch failed — the showcase is purely ambient,
   // so it just doesn't render rather than showing an error state on Home.
@@ -100,6 +106,13 @@ export default function HomePage() {
   const finishedThisYearCount =
     books?.filter((b) => b.finishedOn?.startsWith(String(now.getFullYear()))).length ?? 0;
 
+  const todayKey = toDateInput(now);
+  const activeHabits = habits.filter((h) => !h.archivedAt);
+  const habitsDoneToday = activeHabits.filter((h) => isChecked(h.id, todayKey)).length;
+  const visibleHabits = activeHabits.slice(0, HOME_HABITS_LIMIT);
+  const moreHabitsCount = Math.max(0, activeHabits.length - HOME_HABITS_LIMIT);
+  const showHabitsCard = !habitsLoading || habits.length > 0;
+
   return (
     <div className={styles.page}>
       <div className={styles.glow} />
@@ -149,6 +162,67 @@ export default function HomePage() {
           )}
         </div>
       </Link>
+
+      {showHabitsCard && (
+        activeHabits.length === 0 ? (
+          <Link href="/habits" className={styles.habitsCardEmpty}>
+            Set up your daily habits
+          </Link>
+        ) : (
+          <div className={styles.habitsCard}>
+            <div className={styles.habitsHeader}>
+              <span className={styles.snapshotLabel}>Habits</span>
+              <Link href="/habits" className={styles.snapshotOpenHint}>
+                open →
+              </Link>
+            </div>
+            <div className={styles.habitsList}>
+              {visibleHabits.map((habit) => {
+                const checked = isChecked(habit.id, todayKey);
+                return (
+                  <button
+                    key={habit.id}
+                    type="button"
+                    className={styles.habitRow}
+                    onClick={() => void toggleCheck(habit.id, todayKey)}
+                    role="checkbox"
+                    aria-checked={checked}
+                    aria-label={checked ? `Mark ${habit.name} not done today` : `Mark ${habit.name} done today`}
+                  >
+                    <span
+                      className={[styles.habitCheckbox, checked ? styles.habitCheckboxChecked : '']
+                        .filter(Boolean)
+                        .join(' ')}
+                    >
+                      {checked && (
+                        <span className={styles.habitCheckIcon}>
+                          <FontAwesomeIcon icon={faCheck} />
+                        </span>
+                      )}
+                    </span>
+                    <span className={styles.habitName}>{habit.name}</span>
+                  </button>
+                );
+              })}
+              {moreHabitsCount > 0 && (
+                <Link href="/habits" className={styles.habitsMore}>
+                  +{moreHabitsCount} more
+                </Link>
+              )}
+            </div>
+            <div
+              className={[
+                styles.habitsFooter,
+                habitsDoneToday === activeHabits.length ? styles.habitsFooterDone : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {habitsDoneToday} of {activeHabits.length} done today
+            </div>
+          </div>
+        )
+      )}
 
       {game && (
         <Link href="/stats" className={styles.levelStrip}>
@@ -258,6 +332,10 @@ export default function HomePage() {
         <Link href="/books" className={styles.tile}>
           <FontAwesomeIcon icon={faBook} className={styles.tileIcon} />
           <span>Books</span>
+        </Link>
+        <Link href="/habits" className={styles.tile}>
+          <FontAwesomeIcon icon={faListCheck} className={styles.tileIcon} />
+          <span>Habits</span>
         </Link>
       </div>
 

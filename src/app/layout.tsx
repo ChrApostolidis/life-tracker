@@ -5,6 +5,7 @@ import "react-date-picker/dist/DatePicker.css";
 import "./globals.css";
 import AppShell from "./components/AppShell";
 import { AppProvider } from "@/lib/app-context";
+import { HabitsProvider } from "@/lib/habits-context";
 import CaptureModal from "./components/CaptureModal";
 import Fab from "./components/Fab";
 
@@ -36,9 +37,11 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body>
         <AppProvider>
-          <AppShell>{children}</AppShell>
-          <Fab />
-          <CaptureModal />
+          <HabitsProvider>
+            <AppShell>{children}</AppShell>
+            <Fab />
+            <CaptureModal />
+          </HabitsProvider>
         </AppProvider>
       </body>
     </html>

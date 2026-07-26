@@ -366,6 +366,132 @@ div.booksStripCover {
   color: var(--text-muted);
 }
 
+/* ── Habits (interactive — a plain div, not a <Link>: it holds checkbox
+   buttons, and <button> inside <a> is invalid HTML with conflicting click
+   targets. Navigation lives in the header's own small link instead.) ── */
+.habitsCard {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.habitsCardEmpty {
+  display: block;
+  position: relative;
+  z-index: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.habitsCardEmpty:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
+}
+
+.habitsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.habitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.habitRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.habitRow:hover {
+  background: var(--bg-hover);
+}
+
+.habitCheckbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1.5px solid var(--text-muted);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.habitCheckboxChecked {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.habitCheckIcon {
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+}
+
+.habitCheckIcon svg {
+  width: 9px;
+  height: 9px;
+}
+
+.habitName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.habitsMore {
+  display: block;
+  margin-top: 4px;
+  padding: 4px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.habitsMore:hover {
+  color: var(--text-primary);
+}
+
+.habitsFooter {
+  margin-top: 10px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.habitsFooterDone {
+  color: var(--success);
+}
+
 /* ── Quick menu tiles ── */
 .tiles {
   position: relative;
