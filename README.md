@@ -22,7 +22,7 @@ This is the **frontend** (Next.js). The API/persistence layer lives in a separat
 
 I kept splitting my life across a todo app, a notes app, a budgeting app, a Goodreads-adjacent spreadsheet, and a mental tally of habits I was pretending to keep and none of them talked to each other or made the data feel like *mine*. This app is the alternative: one place, one data model, one look, built around two ideas:
 
-- **Capture-first** — getting a thought out of your head should take one keystroke (`Cmd/Ctrl+K`) or one sentence spoken into a mic, not a form. Sort it out later.
+- **Capture-first** — getting a thought out of your head should take one keystroke (`Cmd/Ctrl+K`) or one sentence spoken into a mic, not a form.
 - **Time-aware** — the same underlying data (tasks, money, habits) is just viewed through a different lens at Day / Week / Month / Year zoom, instead of each screen owning its own siloed logic.
 
 The RPG layer (`/stats` — levels, XP, streaks, attributes, achievements) exists because plain analytics dashboards are boring to open voluntarily. Turning "3-day streak" into something that visibly levels up a character made me actually want to check the app.
