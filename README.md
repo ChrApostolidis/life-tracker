@@ -12,9 +12,7 @@ This is the **frontend** (Next.js). The API/persistence layer lives in a separat
 - [Features](#features)
 - [Demos](#demos)
 - [Tech stack](#tech-stack)
-- [Getting started](#getting-started)
 - [Project structure](#project-structure)
-- [Status](#status)
 
 ---
 
@@ -45,6 +43,19 @@ The RPG layer (`/stats` — levels, XP, streaks, attributes, achievements) exist
 
 ## Demos
 
+There's no hosted demo. This runs on hardware in my apartment, not the cloud, so instead of a link that might time out on you, here's what it actually does.
+
+### Capture loop
+
+![Capture loop demo](docs/media/capture-loop.gif)
+
+Typing a task straight into Quick Capture.
+
+### Voice capture
+
+![Voice capture demo](docs/media/voice-capture.gif)
+
+Speaking a task instead of typing it — same Quick Capture flow, voice input.
 
 ## Tech stack
 
@@ -67,5 +78,4 @@ src/
                     and one *-context.tsx per feature domain (optimistic state + rollback)
 ```
 
-## Status
 
