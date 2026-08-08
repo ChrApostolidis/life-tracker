@@ -2,6 +2,8 @@ import type {
   Book,
   BookInput,
   BookPatch,
+  DayNote,
+  DayNoteInput,
   Habit,
   HabitCheck,
   HabitInput,
@@ -152,4 +154,17 @@ export const api = {
 
   uncheckHabit: (id: string, date: string) =>
     request<void>(`/api/habits/${id}/checks/${date}`, { method: 'DELETE' }),
+
+  // Day journal: one entry per calendar day, addressed by 'YYYY-MM-DD'.
+  listDayNotes: (from: string, to: string) =>
+    request<DayNote[]>(`/api/day-notes?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
+  // 404 = that day has no entry. Callers treat that as empty, not as an error.
+  getDayNote: (date: string) => request<DayNote>(`/api/day-notes/${date}`),
+
+  // Upsert. A blank body clears the entry.
+  saveDayNote: (date: string, input: DayNoteInput) =>
+    request<DayNote>(`/api/day-notes/${date}`, { method: 'POST', body: input }),
+
+  removeDayNote: (date: string) => request<void>(`/api/day-notes/${date}`, { method: 'DELETE' }),
 };

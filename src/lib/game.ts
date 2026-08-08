@@ -2,7 +2,7 @@
 // levels, streaks, attributes, and achievements. No stored game state — every
 // number here is re-derived from the same data the rest of the app already
 // shows, so there's nothing to desync or cheat.
-import type { HabitCheck, MoneyEntry, Note, Task } from './types';
+import type { DayNote, HabitCheck, MoneyEntry, Note, Task } from './types';
 import { addDays, fromDateInput, toDateInput } from './date';
 
 // ── XP economy (tune here) ──────────────────────────────────────────────────
@@ -22,6 +22,7 @@ export const XP = {
   streak100: 1000,
   habitCheck: 4,
   habitCheckXpCapPerDay: 5, // anti-cheese: 20 habits checked in a day still earns 5×4
+  journalEntry: 12, // higher than noteWritten — an entry is more effort, and the schema allows only one per day so no cap is needed
 } as const;
 
 const LEVEL_TITLES: { minLevel: number; title: string }[] = [
@@ -62,7 +63,8 @@ export type AchievementId =
   | 'inboxZero'
   | 'habitFormed'
   | 'ironWill'
-  | 'steadyHand';
+  | 'steadyHand'
+  | 'dearDiary';
 
 export type Achievement = {
   id: AchievementId;
@@ -92,6 +94,7 @@ export type GameInput = {
   notes: Note[];
   money: MoneyEntry[];
   habitChecks: HabitCheck[];
+  dayNotes: DayNote[];
   inboxCount: number;
   now: Date;
 };
@@ -168,12 +171,14 @@ function titleForLevel(level: number): string {
 
 // ── Main computation ─────────────────────────────────────────────────────
 
-export function computeGameState({ tasks, notes, money, habitChecks, inboxCount, now }: GameInput): GameState {
+export function computeGameState({ tasks, notes, money, habitChecks, dayNotes, inboxCount, now }: GameInput): GameState {
   const todayKey = toDateInput(now);
 
   const liveTasks = tasks.filter((t) => !t.deletedAt);
   const liveNotes = notes.filter((n) => !n.deletedAt);
   const liveMoney = money.filter((m) => !m.deletedAt);
+  const liveDayNotes = dayNotes.filter((d) => !d.deletedAt);
+  const journalEntryDays = new Set(liveDayNotes.map((d) => d.entryDate));
 
   // ── Day/month buckets ──
   const scheduledByDay = new Map<string, { total: number; completed: number }>();
@@ -237,7 +242,9 @@ export function computeGameState({ tasks, notes, money, habitChecks, inboxCount,
 
   const activeDays = new Set(completedByDay.keys());
   const moneyDays = new Set(moneyByDay.keys());
-  const journalDays = new Set(notesByDay.keys());
+  // Union, not a switch to day-notes-only — this preserves the streak history
+  // the 14 existing standalone notes already earned.
+  const journalDays = new Set([...notesByDay.keys(), ...journalEntryDays]);
   const noSpendDays = new Set(
     [...moneyByDay.entries()].filter(([, b]) => b.spentCents === 0).map(([k]) => k),
   );
@@ -265,6 +272,7 @@ export function computeGameState({ tasks, notes, money, habitChecks, inboxCount,
     if (bucket.earnedCents > bucket.spentCents) addXp(`${monthKey}-01`, XP.positiveMonth);
   });
   habitChecksByDay.forEach((count, key) => addXp(key, Math.min(count, XP.habitCheckXpCapPerDay) * XP.habitCheck));
+  journalEntryDays.forEach((key) => addXp(key, XP.journalEntry));
   // One milestone award per streak run, at its highest tier reached.
   computeRuns(activeDays).forEach((run) => {
     const tier = run.length >= 100 ? XP.streak100 : run.length >= 30 ? XP.streak30 : run.length >= 7 ? XP.streak7 : 0;
@@ -336,7 +344,8 @@ export function computeGameState({ tasks, notes, money, habitChecks, inboxCount,
   notesByDay.forEach((count, key) => {
     if (inWindow(key)) notesInWindow += count;
   });
-  const reflection = Math.round(Math.min(100, (notesInWindow / 30) * 100));
+  const journalEntriesInWindow = [...journalEntryDays].filter(inWindow).length;
+  const reflection = Math.round(Math.min(100, ((notesInWindow + journalEntriesInWindow) / 30) * 100));
 
   const attributes: Attributes = { discipline, consistency, wealth, reflection };
 
@@ -390,6 +399,10 @@ export function computeGameState({ tasks, notes, money, habitChecks, inboxCount,
     if (ironRun && (!ironWillDay || ironRun.end < ironWillDay)) ironWillDay = ironRun.end;
   });
   const steadyHandRun = habitRuns.find((r) => r.length >= 30);
+
+  // Specifically day-journal entries, not the journalDays union — this
+  // achievement is about the journal feature itself, not notes in general.
+  const dearDiaryRun = computeRuns(journalEntryDays).find((r) => r.length >= 30);
 
   const voiceCandidates = [
     ...liveTasks.filter((t) => t.source === 'voice').map((t) => t.createdAt),
@@ -516,6 +529,12 @@ export function computeGameState({ tasks, notes, money, habitChecks, inboxCount,
       title: 'Steady Hand',
       description: '30 days in a row checking at least one habit',
       unlockedAt: steadyHandRun?.end ?? null,
+    },
+    {
+      id: 'dearDiary',
+      title: 'Dear Diary',
+      description: '30 days in a row with a journal entry',
+      unlockedAt: dearDiaryRun?.end ?? null,
     },
   ];
 

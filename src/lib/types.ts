@@ -162,3 +162,19 @@ export type HabitCheck = {
   checkedOn: string;
   createdAt: string;
 };
+
+// One free-form journal entry per calendar day. entryDate is a local
+// 'YYYY-MM-DD'. A blank body is not stored — saving one clears the entry (see
+// the backend's DayNoteService), so every DayNote the frontend sees has real
+// text. A day with no entry yet returns 404, not an empty DayNote.
+export type DayNote = {
+  id: string;
+  entryDate: string;
+  body: string;
+  rating: number | null; // 1–5, purely descriptive — deliberately not fed into XP
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type DayNoteInput = { body: string; rating?: number | null };
