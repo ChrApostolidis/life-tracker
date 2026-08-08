@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTrash, faPlus, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import { useHabits } from '@/lib/habits-context';
+import DayJournal from './DayJournal';
 import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays, toDateInput } from '@/lib/date';
 import type { Task } from '@/lib/types';
 import { getNowId, taskKey } from '@/lib/helpers';
@@ -266,6 +267,8 @@ export default function DayView({ date }: { date: Date }) {
           {loading ? 'Loading…' : 'Nothing scheduled. Add a task to get started.'}
         </div>
       )}
+
+      {startOfDay(date).getTime() <= startOfDay(now).getTime() && <DayJournal date={date} />}
     </div>
   );
 }
