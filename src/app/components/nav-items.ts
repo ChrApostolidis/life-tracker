@@ -4,6 +4,7 @@ import {
   faCalendarDays,
   faCalendarWeek,
   faDiceD20,
+  faFilm,
   faHouse,
   faListCheck,
   faNoteSticky,
@@ -31,6 +32,7 @@ export const navItems: NavItem[] = [
   { label: "Notes", href: "/notes", icon: faNoteSticky },
   { label: "Money", href: "/money", icon: faWallet },
   { label: "Books", href: "/books", icon: faBook },
+  { label: "Watchlist", href: "/watchlist", icon: faFilm },
   { label: "Stats", href: "/stats", icon: faDiceD20 },
 ];
 
