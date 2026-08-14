@@ -1,0 +1,155 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+
+.itemTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.message {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ── Season pills ── */
+.seasonPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.seasonPill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.seasonPill:hover {
+  color: var(--text-primary);
+}
+
+.seasonPillActive,
+.seasonPillActive:hover {
+  background: var(--accent-soft);
+  border-color: rgba(107, 155, 209, 0.4);
+  color: var(--accent);
+}
+
+/* ── Mark season watched ── */
+.markAllBtn {
+  align-self: flex-start;
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(107, 155, 209, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.markAllBtn:hover {
+  opacity: 0.85;
+}
+
+.markAllBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Episode list ── */
+.episodeList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.episodeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  margin: 0 -8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 120ms ease;
+}
+
+.episodeRow:hover {
+  background: var(--bg-hover);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1.5px solid var(--text-muted);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.checkboxChecked {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.checkIcon {
+  display: grid;
+  place-items: center;
+  color: var(--bg);
+}
+
+.checkIcon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.episodeCode {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.episodeName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.episodeDate {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
