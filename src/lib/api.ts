@@ -4,6 +4,8 @@ import type {
   BookPatch,
   DayNote,
   DayNoteInput,
+  EpisodeWatch,
+  EpisodeWatchResponse,
   Habit,
   HabitCheck,
   HabitInput,
@@ -18,6 +20,9 @@ import type {
   Task,
   TaskInput,
   TaskPatch,
+  WatchItem,
+  WatchItemInput,
+  WatchItemPatch,
 } from './types';
 
 // Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
@@ -167,4 +172,25 @@ export const api = {
     request<DayNote>(`/api/day-notes/${date}`, { method: 'POST', body: input }),
 
   removeDayNote: (date: string) => request<void>(`/api/day-notes/${date}`, { method: 'DELETE' }),
+
+  // Watch items: all non-deleted, newest first. No range — single user, tiny data.
+  listWatchItems: () => request<WatchItem[]>('/api/watch-items'),
+
+  createWatchItem: (input: WatchItemInput) =>
+    request<WatchItem>('/api/watch-items', { method: 'POST', body: input }),
+
+  updateWatchItem: (id: string, patch: WatchItemPatch) =>
+    request<WatchItem>(`/api/watch-items/${id}`, { method: 'PATCH', body: patch }),
+
+  removeWatchItem: (id: string) => request<void>(`/api/watch-items/${id}`, { method: 'DELETE' }),
+
+  // Every episode-watch row across every series — the frontend groups by item.
+  listEpisodeWatches: () => request<EpisodeWatch[]>('/api/episode-watches'),
+
+  // Idempotent. May auto-advance the item to 'watched' — see EpisodeWatchResponse.
+  watchEpisode: (id: string, season: number, episode: number) =>
+    request<EpisodeWatchResponse>(`/api/watch-items/${id}/episodes/${season}/${episode}`, { method: 'POST' }),
+
+  unwatchEpisode: (id: string, season: number, episode: number) =>
+    request<void>(`/api/watch-items/${id}/episodes/${season}/${episode}`, { method: 'DELETE' }),
 };
