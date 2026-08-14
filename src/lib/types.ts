@@ -178,3 +178,66 @@ export type DayNote = {
 };
 
 export type DayNoteInput = { body: string; rating?: number | null };
+
+export type MediaType = 'movie' | 'series';
+// 'watchlist' -> 'watching' -> 'watched', with 'dropped' as a terminal side-state.
+export type WatchStatus = 'watchlist' | 'watching' | 'watched' | 'dropped';
+
+// Mirrors the backend watch_items entity. startedOn/finishedOn are local
+// 'YYYY-MM-DD' strings auto-stamped when status moves to watching/watched.
+// totalSeasons/totalEpisodes are a snapshot taken from TMDB at add time and
+// are null for movies (and for series where TMDB didn't report them).
+export type WatchItem = {
+  id: string;
+  tmdbId: number;
+  mediaType: MediaType;
+  title: string;
+  year: string | null;
+  posterUrl: string | null;
+  status: WatchStatus;
+  rating: number | null;
+  startedOn: string | null;
+  finishedOn: string | null;
+  totalSeasons: number | null;
+  totalEpisodes: number | null;
+  notes: string | null;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WatchItemInput = {
+  tmdbId: number;
+  mediaType: MediaType;
+  title: string;
+  year?: string | null;
+  posterUrl?: string | null;
+  status: WatchStatus;
+  totalSeasons?: number | null;
+  totalEpisodes?: number | null;
+};
+
+// Payload for PATCH /api/watch-items/{id} — null/absent = leave unchanged.
+// Status auto-stamps dates server-side (except 'dropped', which stamps
+// neither); send startedOn/finishedOn explicitly to override the auto-stamp.
+export type WatchItemPatch = Partial<
+  Pick<WatchItem, 'title' | 'status' | 'startedOn' | 'finishedOn' | 'rating' | 'notes' | 'posterUrl'>
+>;
+
+// One row = "this episode was watched". Un-watching deletes the row outright
+// (see the backend's WatchItemService for why — same reasoning as HabitCheck).
+export type EpisodeWatch = {
+  id: string;
+  watchItemId: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  createdAt: string;
+};
+
+// Returned by the watch-episode endpoint: the item may have been auto-advanced
+// to 'watched' server-side (finishing the last episode), so its current state
+// comes back in the same response instead of requiring a separate refetch.
+export type EpisodeWatchResponse = {
+  episodeWatch: EpisodeWatch;
+  watchItem: WatchItem;
+};
