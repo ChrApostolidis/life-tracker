@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { tmdbGet, TmdbUpstreamError, posterUrl, toMediaType } from '@/app/api/tmdb/_lib';
+import { tmdbGet, TmdbUpstreamError, posterUrl, resolveGenres, toMediaType } from '@/app/api/tmdb/_lib';
 
 type TmdbMultiSearchResult = {
   media_type: string;
@@ -10,6 +10,7 @@ type TmdbMultiSearchResult = {
   first_air_date?: string;
   poster_path: string | null;
   overview: string | null;
+  genre_ids?: number[];
 };
 
 type TmdbMultiSearchResponse = { results: TmdbMultiSearchResult[] };
@@ -24,21 +25,26 @@ export async function GET(request: NextRequest) {
       include_adult: 'false',
     });
 
-    const results = data.results
-      .map((r) => {
-        const mediaType = toMediaType(r.media_type);
-        if (!mediaType) return null; // drops 'person' results
-        const dateStr = mediaType === 'movie' ? r.release_date : r.first_air_date;
+    const watchable = data.results
+      .map((r) => ({ raw: r, mediaType: toMediaType(r.media_type) }))
+      .filter((r): r is { raw: TmdbMultiSearchResult; mediaType: 'movie' | 'series' } => r.mediaType !== null);
+
+    // resolveGenres is async but memoized after the first call, so this costs
+    // at most two extra upstream requests for the whole server process.
+    const results = await Promise.all(
+      watchable.map(async ({ raw, mediaType }) => {
+        const dateStr = mediaType === 'movie' ? raw.release_date : raw.first_air_date;
         return {
-          tmdbId: r.id,
+          tmdbId: raw.id,
           mediaType,
-          title: (mediaType === 'movie' ? r.title : r.name) ?? 'Untitled',
+          title: (mediaType === 'movie' ? raw.title : raw.name) ?? 'Untitled',
           year: dateStr ? dateStr.slice(0, 4) : null,
-          posterUrl: posterUrl(r.poster_path),
-          overview: r.overview ?? null,
+          posterUrl: posterUrl(raw.poster_path),
+          genres: await resolveGenres(mediaType, raw.genre_ids),
+          overview: raw.overview ?? null,
         };
-      })
-      .filter((r): r is NonNullable<typeof r> => r !== null);
+      }),
+    );
 
     return NextResponse.json({ results });
   } catch (e) {

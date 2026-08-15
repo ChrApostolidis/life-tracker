@@ -48,3 +48,40 @@ export function toMediaType(tmdbMediaType: string): 'movie' | 'series' | null {
   if (tmdbMediaType === 'tv') return 'series';
   return null; // 'person' and anything else — filtered out by the caller
 }
+
+// More than three genres stops being a label and starts being a paragraph.
+const MAX_GENRES = 3;
+
+type TmdbGenreList = { genres: { id: number; name: string }[] };
+
+// Multi-search returns genre ids, not names. The two id->name maps are small
+// and effectively static, so each is fetched once per server process.
+const genreNamesByKind = new Map<string, Map<number, string>>();
+
+async function genreNames(kind: 'movie' | 'tv'): Promise<Map<number, string>> {
+  const cached = genreNamesByKind.get(kind);
+  if (cached) return cached;
+  const data = await tmdbGet<TmdbGenreList>(`/genre/${kind}/list`);
+  const names = new Map(data.genres.map((g) => [g.id, g.name]));
+  genreNamesByKind.set(kind, names);
+  return names;
+}
+
+// Returns 'Comedy, Drama' — or null if the lookup fails, since a missing genre
+// label is not worth failing an otherwise good search result over.
+export async function resolveGenres(
+  mediaType: 'movie' | 'series',
+  genreIds: number[] | undefined,
+): Promise<string | null> {
+  if (!genreIds || genreIds.length === 0) return null;
+  try {
+    const names = await genreNames(mediaType === 'movie' ? 'movie' : 'tv');
+    const resolved = genreIds
+      .map((id) => names.get(id))
+      .filter((name): name is string => Boolean(name))
+      .slice(0, MAX_GENRES);
+    return resolved.length > 0 ? resolved.join(', ') : null;
+  } catch {
+    return null;
+  }
+}

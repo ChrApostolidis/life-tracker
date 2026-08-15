@@ -86,6 +86,7 @@ export function WatchProvider({ children }: { children: ReactNode }) {
       title: input.title,
       year: input.year ?? null,
       posterUrl: input.posterUrl ?? null,
+      genres: input.genres ?? null,
       status: input.status,
       rating: null,
       startedOn: null,
