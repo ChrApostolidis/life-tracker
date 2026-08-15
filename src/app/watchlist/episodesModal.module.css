@@ -49,28 +49,56 @@
   color: var(--accent);
 }
 
-/* ── Mark season watched ── */
-.markAllBtn {
-  align-self: flex-start;
+/* ── Bulk actions, pinned below the scrolling episode list ── */
+.bulkActions {
   flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid rgba(107, 155, 209, 0.4);
-  background: var(--accent-soft);
-  color: var(--accent);
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  /* No-op on desktop, where flex already pins this below the scroll area.
+     On mobile the whole sheet scrolls instead, so sticky keeps it in view. */
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-elevated);
+}
+
+.bulkBtn,
+.bulkBtnGhost {
+  padding: 8px 14px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 500;
   font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   cursor: pointer;
-  transition: opacity 120ms ease;
+  transition: opacity 120ms ease, color 120ms ease, border-color 120ms ease;
 }
 
-.markAllBtn:hover {
+.bulkBtn {
+  border: 1px solid rgba(107, 155, 209, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.bulkBtnGhost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.bulkBtn:hover:not(:disabled) {
   opacity: 0.85;
 }
 
-.markAllBtn:disabled {
-  opacity: 0.5;
+.bulkBtnGhost:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.bulkBtn:disabled,
+.bulkBtnGhost:disabled {
+  opacity: 0.4;
   cursor: default;
 }
 

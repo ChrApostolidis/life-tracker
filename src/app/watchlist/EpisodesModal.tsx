@@ -18,7 +18,7 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
   const [loadingSeries, setLoadingSeries] = useState(false);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [markingAll, setMarkingAll] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState<'watch' | 'unwatch' | null>(null);
 
   const watchedKeys = useMemo(
     () =>
@@ -92,21 +92,24 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
     };
   }, [item, selectedSeason, episodesBySeason]);
 
-  async function handleMarkSeasonWatched() {
+  // Sequential, not Promise.all — ticking 24 episodes at once shouldn't fire
+  // 24 simultaneous requests. `watched` picks the direction: only episodes
+  // already in the wrong state get toggled, so this is safe to re-run.
+  async function applyToSeason(watched: boolean) {
     if (!item || selectedSeason == null) return;
-    const episodes = episodesBySeason[selectedSeason] ?? [];
-    setMarkingAll(true);
-    // Sequential, not Promise.all — ticking 24 episodes at once shouldn't
-    // fire 24 simultaneous requests.
-    for (const ep of episodes) {
-      if (!watchedKeys.has(`${selectedSeason}-${ep.episodeNumber}`)) {
+    setBulkBusy(watched ? 'watch' : 'unwatch');
+    for (const ep of episodesBySeason[selectedSeason] ?? []) {
+      if (watchedKeys.has(`${selectedSeason}-${ep.episodeNumber}`) !== watched) {
         await toggleEpisode(item.id, selectedSeason, ep.episodeNumber);
       }
     }
-    setMarkingAll(false);
+    setBulkBusy(null);
   }
 
   const currentEpisodes = selectedSeason != null ? (episodesBySeason[selectedSeason] ?? []) : [];
+  const watchedInSeason = currentEpisodes.filter((ep) =>
+    watchedKeys.has(`${selectedSeason}-${ep.episodeNumber}`),
+  ).length;
 
   return (
     <Modal open={item !== null} eyebrow="Episodes" onClose={onClose} width={520} height={620}>
@@ -136,17 +139,6 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
                   </button>
                 ))}
               </div>
-
-              {!loadingEpisodes && currentEpisodes.length > 0 && (
-                <button
-                  type="button"
-                  className={styles.markAllBtn}
-                  onClick={() => void handleMarkSeasonWatched()}
-                  disabled={markingAll}
-                >
-                  {markingAll ? 'Marking…' : 'Mark season watched'}
-                </button>
-              )}
 
               <div className={styles.episodeList}>
                 {loadingEpisodes && <div className={styles.message}>Loading episodes…</div>}
@@ -186,6 +178,27 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
                       </button>
                     );
                   })}
+              </div>
+
+              {/* Outside .episodeList, which owns the scroll — so these stay
+                  put no matter how long the season is. */}
+              <div className={styles.bulkActions}>
+                <button
+                  type="button"
+                  className={styles.bulkBtn}
+                  onClick={() => void applyToSeason(true)}
+                  disabled={bulkBusy !== null || currentEpisodes.length === 0 || watchedInSeason === currentEpisodes.length}
+                >
+                  {bulkBusy === 'watch' ? 'Marking…' : 'Mark season watched'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.bulkBtnGhost}
+                  onClick={() => void applyToSeason(false)}
+                  disabled={bulkBusy !== null || watchedInSeason === 0}
+                >
+                  {bulkBusy === 'unwatch' ? 'Clearing…' : 'Unwatch season'}
+                </button>
               </div>
             </>
           )}

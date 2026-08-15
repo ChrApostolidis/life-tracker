@@ -5,27 +5,36 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilm, faStar, faTrash, faTv } from '@fortawesome/free-solid-svg-icons';
 import { useWatch } from '@/lib/watch-context';
 import { searchTmdb, type TmdbSearchResult } from '@/lib/tmdb';
-import type { MediaType, WatchItem, WatchStatus } from '@/lib/types';
+import { statusesFor, type MediaType, type WatchItem, type WatchStatus } from '@/lib/types';
+import { fromDateInput } from '@/lib/date';
 import EpisodesModal from './EpisodesModal';
 import styles from './watchlist.module.css';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const SEARCH_MIN_CHARS = 3;
 
+const STATUS_LABELS: Record<WatchStatus, string> = {
+  watchlist: 'Watchlist',
+  watching: 'Watching',
+  watched: 'Watched',
+};
+
 const FILTERS: { key: 'all' | WatchStatus; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'watchlist', label: 'Watchlist' },
   { key: 'watching', label: 'Watching' },
   { key: 'watched', label: 'Watched' },
-  { key: 'dropped', label: 'Dropped' },
 ];
 
-const STATUS_PILLS: { key: WatchStatus; label: string }[] = [
-  { key: 'watchlist', label: 'Watchlist' },
-  { key: 'watching', label: 'Watching' },
-  { key: 'watched', label: 'Watched' },
-  { key: 'dropped', label: 'Dropped' },
-];
+// '2026-08-15' -> '15 Aug 2026'. Local to this page — the shelf card is the
+// only place a watch date is rendered.
+function formatWatchDate(day: string): string {
+  return fromDateInput(day).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 export default function WatchlistPage() {
   const { items, episodeWatches, loading, error, addItem, updateItem, deleteItem } = useWatch();
@@ -81,6 +90,7 @@ export default function WatchlistPage() {
       title: result.title,
       year: result.year,
       posterUrl: result.posterUrl,
+      genres: result.genres,
       status,
     });
     resetSearch();
@@ -141,6 +151,7 @@ export default function WatchlistPage() {
                     <div className={styles.resultTitle}>{result.title}</div>
                     <div className={styles.resultSub}>
                       {result.year ?? 'Unknown year'} · {result.mediaType === 'movie' ? 'Movie' : 'Series'}
+                      {result.genres && ` · ${result.genres}`}
                     </div>
                   </div>
                   <div className={styles.resultActions}>
@@ -151,13 +162,24 @@ export default function WatchlistPage() {
                     >
                       Watchlist
                     </button>
-                    <button
-                      type="button"
-                      className={styles.watchingBtn}
-                      onClick={() => handleAdd(result, 'watching')}
-                    >
-                      Watching
-                    </button>
+                    {/* A movie has no part-way state, so it goes straight on the list. */}
+                    {result.mediaType === 'series' ? (
+                      <button
+                        type="button"
+                        className={styles.watchingBtn}
+                        onClick={() => handleAdd(result, 'watching')}
+                      >
+                        Watching
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.watchingBtn}
+                        onClick={() => handleAdd(result, 'watched')}
+                      >
+                        Watched
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -259,6 +281,7 @@ function WatchCard({
   onOpenEpisodes,
 }: WatchCardProps) {
   const isSeries = item.mediaType === 'series';
+  const watchedOn = item.status === 'watched' ? item.finishedOn : null;
 
   return (
     <div className={styles.card}>
@@ -274,23 +297,28 @@ function WatchCard({
         iconClassName={styles.coverIcon}
       />
 
-      <div className={styles.cardTitle}>{item.title}</div>
-      <div className={styles.cardMeta}>
-        {item.year && <span>{item.year}</span>}
-        <span className={styles.mediaBadge}>{isSeries ? 'Series' : 'Movie'}</span>
+      <div className={styles.cardHead}>
+        <div className={styles.cardTitle}>{item.title}</div>
+        <div className={styles.cardMeta}>
+          {item.year && <span>{item.year}</span>}
+          <span className={styles.mediaBadge}>{isSeries ? 'Series' : 'Movie'}</span>
+        </div>
       </div>
+      {item.genres && <div className={styles.cardGenres}>{item.genres}</div>}
 
-      <div className={styles.statusPills}>
-        {STATUS_PILLS.map((s) => (
+      {/* Segmented control rather than pills: two statuses for a movie and
+          three for a series both fit one row, so cards stay aligned. */}
+      <div className={styles.statusBar}>
+        {statusesFor(item.mediaType).map((status) => (
           <button
-            key={s.key}
+            key={status}
             type="button"
-            className={[styles.statusPill, item.status === s.key ? styles.statusPillActive : '']
+            className={[styles.statusSeg, item.status === status ? styles.statusSegActive : '']
               .filter(Boolean)
               .join(' ')}
-            onClick={() => onStatusChange(s.key)}
+            onClick={() => onStatusChange(status)}
           >
-            {s.label}
+            {STATUS_LABELS[status]}
           </button>
         ))}
       </div>
@@ -314,15 +342,16 @@ function WatchCard({
         </div>
       )}
 
-      {isSeries && (
-        <button type="button" className={styles.episodesBtn} onClick={onOpenEpisodes}>
-          {item.totalEpisodes != null ? `${watchedEpisodeCount} / ${item.totalEpisodes} episodes` : 'Episodes'}
-        </button>
-      )}
-
-      {(item.startedOn || item.finishedOn) && (
-        <div className={styles.dates}>
-          {item.startedOn ?? '—'} → {item.finishedOn ?? '—'}
+      {/* Pinned to the bottom (margin-top:auto) so the episodes button and the
+          watched date land in the same place on every card in a row. */}
+      {(isSeries || watchedOn) && (
+        <div className={styles.cardFooter}>
+          {isSeries && (
+            <button type="button" className={styles.episodesBtn} onClick={onOpenEpisodes}>
+              {item.totalEpisodes != null ? `${watchedEpisodeCount} / ${item.totalEpisodes} episodes` : 'Episodes'}
+            </button>
+          )}
+          {watchedOn && <div className={styles.watchedOn}>Watched {formatWatchDate(watchedOn)}</div>}
         </div>
       )}
     </div>

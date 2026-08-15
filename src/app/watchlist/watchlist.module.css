@@ -284,24 +284,32 @@ div.cover {
   font-size: 24px;
 }
 
+/* Title left, year + media badge pushed right on the same baseline. */
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .cardTitle {
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cardMeta {
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: -4px;
 }
 
 .mediaBadge {
@@ -312,35 +320,57 @@ div.cover {
   color: var(--text-muted);
 }
 
-.statusPills {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
+/* One line only — a third genre is already the cap, and wrapping would push
+   the status pills out of alignment across the grid. */
+.cardGenres {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.statusPill {
-  padding: 3px 8px;
-  border-radius: 999px;
+/* Auto-flow column with equal tracks: 2 segments (movie) or 3 (series) both
+   fill exactly one row, so no card ever wraps a status onto its own line. */
+.statusBar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.statusSeg {
+  min-width: 0;
+  padding: 6px 2px;
+  border: none;
+  border-left: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 9px;
   font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.2px;
   text-align: center;
+  white-space: nowrap;
   cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  transition: color 120ms ease, background 120ms ease;
 }
 
-.statusPill:hover {
+.statusSeg:first-child {
+  border-left: none;
+}
+
+.statusSeg:hover {
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
-.statusPillActive,
-.statusPillActive:hover {
+.statusSegActive,
+.statusSegActive:hover {
   background: var(--accent-soft);
-  border-color: rgba(107, 155, 209, 0.4);
   color: var(--accent);
 }
 
@@ -374,7 +404,19 @@ div.cover {
   color: var(--border);
 }
 
+/* margin-top:auto pins this to the card's bottom edge; grid rows stretch cards
+   to equal height, so these line up across a row regardless of title length. */
+.cardFooter {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .episodesBtn {
+  width: 100%;
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -392,10 +434,11 @@ div.cover {
   background: var(--accent-soft);
 }
 
-.dates {
+.watchedOn {
   font-size: 11px;
   font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
   color: var(--text-muted);
+  text-align: center;
 }
 
 /* ── Empty state ── */
