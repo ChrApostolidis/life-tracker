@@ -10,6 +10,8 @@ export type TmdbSearchResult = {
   title: string;
   year: string | null;
   posterUrl: string | null;
+  // Comma-separated names ('Comedy, Drama'), capped at three by the route handler.
+  genres: string | null;
   overview: string | null;
 };
 

@@ -180,8 +180,16 @@ export type DayNote = {
 export type DayNoteInput = { body: string; rating?: number | null };
 
 export type MediaType = 'movie' | 'series';
-// 'watchlist' -> 'watching' -> 'watched', with 'dropped' as a terminal side-state.
-export type WatchStatus = 'watchlist' | 'watching' | 'watched' | 'dropped';
+// 'watchlist' -> 'watched'. A series can also sit at 'watching' in between; a
+// movie can't — there's no part-way state worth recording for one, and the
+// backend rejects it. Use statusesFor() rather than listing these by hand.
+export type WatchStatus = 'watchlist' | 'watching' | 'watched';
+
+export function statusesFor(mediaType: MediaType): WatchStatus[] {
+  return mediaType === 'series'
+    ? ['watchlist', 'watching', 'watched']
+    : ['watchlist', 'watched'];
+}
 
 // Mirrors the backend watch_items entity. startedOn/finishedOn are local
 // 'YYYY-MM-DD' strings auto-stamped when status moves to watching/watched.
@@ -194,6 +202,8 @@ export type WatchItem = {
   title: string;
   year: string | null;
   posterUrl: string | null;
+  // Comma-separated TMDB genre names ('Comedy, Drama'), snapshotted at add time.
+  genres: string | null;
   status: WatchStatus;
   rating: number | null;
   startedOn: string | null;
@@ -212,16 +222,17 @@ export type WatchItemInput = {
   title: string;
   year?: string | null;
   posterUrl?: string | null;
+  genres?: string | null;
   status: WatchStatus;
   totalSeasons?: number | null;
   totalEpisodes?: number | null;
 };
 
 // Payload for PATCH /api/watch-items/{id} — null/absent = leave unchanged.
-// Status auto-stamps dates server-side (except 'dropped', which stamps
-// neither); send startedOn/finishedOn explicitly to override the auto-stamp.
+// Status auto-stamps dates server-side; send startedOn/finishedOn explicitly
+// to override the auto-stamp.
 export type WatchItemPatch = Partial<
-  Pick<WatchItem, 'title' | 'status' | 'startedOn' | 'finishedOn' | 'rating' | 'notes' | 'posterUrl'>
+  Pick<WatchItem, 'title' | 'status' | 'startedOn' | 'finishedOn' | 'rating' | 'notes' | 'posterUrl' | 'genres'>
 >;
 
 // One row = "this episode was watched". Un-watching deletes the row outright
