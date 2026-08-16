@@ -36,8 +36,11 @@ The RPG layer (`/stats` — levels, XP, streaks, attributes, achievements) exist
 - **Notes** — a standalone note stream, plus per-book "thoughts" entries
 - **Money log** — expense/income tracking with a piggy-bank balance, category breakdowns, and a 30-day spend strip (parses Greek decimal input like `3,50`)
 - **Book library** — search via Open Library (no API key), a wishlist → owned → reading → finished pipeline with auto-stamped start/finish dates
+- **Movie & series tracker** — search via TMDB (key stays server-side, behind Next.js Route Handlers), a watchlist → watched pipeline with genre labels, plus per-episode tracking for series that auto-completes a show on its final episode
 - **Habits** — binary daily checklists, checkable from Home, Today, or a dedicated `/habits` page, with a rolling streak strip
+- **Day journal** — one free-form entry per day with a 1–5 star rating, saved on blur and folded into the reflection streak
 - **Stats / RPG engine** (`src/lib/game.ts`) — a pure, stateless replay of your history into XP, levels, per-domain streaks, a 4-axis attribute radar, and achievements. Nothing is stored server-side for this; it's recomputed from the same rows every other screen already shows
+- **Skeleton loading** — every page draws placeholder blocks shaped like the content it's fetching, so nothing jumps when the data lands
 
 ---
 
