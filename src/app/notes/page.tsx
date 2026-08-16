@@ -4,7 +4,25 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNoteSticky, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import { formatRelativeTime } from '@/lib/date';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import styles from './notes.module.css';
+
+const SKELETON_ROWS = 6;
+
+// Reuses .card and .row, so the hairline dividers and 14px/16px row padding
+// match the loaded list exactly.
+function RowsSkeleton() {
+  return (
+    <SkeletonBlock className={styles.card} label="Loading notes">
+      {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+        <div key={i} className={styles.row}>
+          <Skeleton width={16} height={16} radius={4} />
+          <Skeleton height={14} width={`${70 - (i % 3) * 12}%`} radius={4} />
+        </div>
+      ))}
+    </SkeletonBlock>
+  );
+}
 
 export default function NotesPage() {
   const { notes, loading, error, deleteNote, promoteNote, openEditNote } = useApp();
@@ -20,9 +38,10 @@ export default function NotesPage() {
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && notes.length === 0 && <div className={styles.message}>Loading…</div>}
 
-      {!loading && notes.length === 0 && !error ? (
+      {loading && notes.length === 0 && !error ? (
+        <RowsSkeleton />
+      ) : !loading && notes.length === 0 && !error ? (
         <div className={styles.empty}>
           <FontAwesomeIcon icon={faNoteSticky} className={styles.emptyIcon} />
           <p>Nothing captured yet. Catch a thought.</p>

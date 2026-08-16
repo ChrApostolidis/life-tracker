@@ -6,11 +6,14 @@ import { faBook, faPen, faStar, faTrash } from '@fortawesome/free-solid-svg-icon
 import { useBooks } from '@/lib/books-context';
 import { searchBooks, type BookSearchResult } from '@/lib/open-library';
 import type { Book, BookStatus } from '@/lib/types';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import ThoughtsModal from './ThoughtsModal';
 import styles from './books.module.css';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const SEARCH_MIN_CHARS = 3;
+// Enough to fill the fold at the widest layout without inventing a full shelf.
+const SKELETON_CARDS = 6;
 
 const FILTERS: { key: 'all' | BookStatus; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -206,7 +209,6 @@ export default function BooksPage() {
       </div>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && books.length === 0 && <div className={styles.message}>Loading…</div>}
 
       <div className={styles.filterPills}>
         {FILTERS.map((f) => (
@@ -223,7 +225,9 @@ export default function BooksPage() {
         ))}
       </div>
 
-      {!loading && !error && shelf.length === 0 ? (
+      {loading && books.length === 0 && !error ? (
+        <ShelfSkeleton />
+      ) : !loading && !error && shelf.length === 0 ? (
         <div className={styles.empty}>
           <FontAwesomeIcon icon={faBook} className={styles.emptyIcon} />
           <p>No books yet. Search above to start your library.</p>
@@ -245,6 +249,25 @@ export default function BooksPage() {
 
       <ThoughtsModal book={thoughtsBook} onClose={() => setThoughtsBook(null)} />
     </div>
+  );
+}
+
+// ── Loading skeleton ──
+
+// Reuses .grid and .card so the placeholders occupy exactly the geometry the
+// real cards will: same track sizing, same padding, same 8px internal gap.
+function ShelfSkeleton() {
+  return (
+    <SkeletonBlock className={styles.grid} label="Loading library">
+      {Array.from({ length: SKELETON_CARDS }, (_, i) => (
+        <div key={i} className={styles.card}>
+          <Skeleton width="100%" style={{ aspectRatio: '2 / 3' }} />
+          <Skeleton height={18} width="75%" radius={4} />
+          <Skeleton height={12} width="50%" radius={4} />
+          <Skeleton height={29} />
+        </div>
+      ))}
+    </SkeletonBlock>
   );
 }
 

@@ -7,7 +7,33 @@ import { useHabits } from '@/lib/habits-context';
 import { computeStreak } from '@/lib/game';
 import { addDays, toDateInput } from '@/lib/date';
 import type { Habit } from '@/lib/types';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import styles from './habits.module.css';
+
+const SKELETON_ROWS = 5;
+const STRIP_DAYS = 14;
+
+// Mirrors a real row: .row supplies the padding and 8px gap, .rowTop the
+// checkbox line, .strip the 14 day cells at their real 16px size.
+function HabitsSkeleton() {
+  return (
+    <SkeletonBlock className={styles.list} label="Loading habits">
+      {Array.from({ length: SKELETON_ROWS }, (_, row) => (
+        <div key={row} className={styles.row}>
+          <div className={styles.rowTop}>
+            <Skeleton width={20} height={20} radius={999} />
+            <Skeleton height={14} width="35%" radius={4} style={{ marginLeft: 14 }} />
+          </div>
+          <div className={styles.strip}>
+            {Array.from({ length: STRIP_DAYS }, (_, day) => (
+              <Skeleton key={day} width={16} height={16} radius={3} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </SkeletonBlock>
+  );
+}
 
 export default function HabitsPage() {
   const {
@@ -89,9 +115,10 @@ export default function HabitsPage() {
       </div>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && habits.length === 0 && <div className={styles.message}>Loading…</div>}
 
-      {!loading && !error && habits.length === 0 ? (
+      {loading && habits.length === 0 && !error ? (
+        <HabitsSkeleton />
+      ) : !loading && !error && habits.length === 0 ? (
         <div className={styles.empty}>
           <FontAwesomeIcon icon={faListCheck} className={styles.emptyIcon} />
           <p>No habits yet. Add one above to start tracking.</p>

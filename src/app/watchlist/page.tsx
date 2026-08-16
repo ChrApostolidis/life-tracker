@@ -7,11 +7,14 @@ import { useWatch } from '@/lib/watch-context';
 import { searchTmdb, type TmdbSearchResult } from '@/lib/tmdb';
 import { statusesFor, type MediaType, type WatchItem, type WatchStatus } from '@/lib/types';
 import { fromDateInput } from '@/lib/date';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import EpisodesModal from './EpisodesModal';
 import styles from './watchlist.module.css';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const SEARCH_MIN_CHARS = 3;
+// Enough to fill the fold at the widest layout without inventing a full shelf.
+const SKELETON_CARDS = 6;
 
 const STATUS_LABELS: Record<WatchStatus, string> = {
   watchlist: 'Watchlist',
@@ -188,7 +191,6 @@ export default function WatchlistPage() {
       </div>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && items.length === 0 && <div className={styles.message}>Loading…</div>}
 
       <div className={styles.filterPills}>
         {FILTERS.map((f) => (
@@ -205,7 +207,9 @@ export default function WatchlistPage() {
         ))}
       </div>
 
-      {!loading && !error && shelf.length === 0 ? (
+      {loading && items.length === 0 && !error ? (
+        <ShelfSkeleton />
+      ) : !loading && !error && shelf.length === 0 ? (
         <div className={styles.empty}>
           <FontAwesomeIcon icon={faFilm} className={styles.emptyIcon} />
           <p>Nothing tracked yet. Search above to start your list.</p>
@@ -231,6 +235,25 @@ export default function WatchlistPage() {
 
       <EpisodesModal item={episodesItem} onClose={() => setEpisodesItem(null)} />
     </div>
+  );
+}
+
+// ── Loading skeleton ──
+
+// Reuses .grid and .card so the placeholders occupy exactly the geometry the
+// real cards will: same track sizing, same padding, same 8px internal gap.
+function ShelfSkeleton() {
+  return (
+    <SkeletonBlock className={styles.grid} label="Loading watchlist">
+      {Array.from({ length: SKELETON_CARDS }, (_, i) => (
+        <div key={i} className={styles.card}>
+          <Skeleton width="100%" style={{ aspectRatio: '2 / 3' }} />
+          <Skeleton height={18} width="75%" radius={4} />
+          <Skeleton height={12} width="45%" radius={4} />
+          <Skeleton height={29} />
+        </div>
+      ))}
+    </SkeletonBlock>
   );
 }
 
@@ -300,7 +323,12 @@ function WatchCard({
       <div className={styles.cardHead}>
         <div className={styles.cardTitle}>{item.title}</div>
         <div className={styles.cardMeta}>
-          {item.year && <span>{item.year}</span>}
+          {item.year && (
+            <>
+              <span>{item.year}</span>
+              <span className={styles.metaDot}>·</span>
+            </>
+          )}
           <span className={styles.mediaBadge}>{isSeries ? 'Series' : 'Movie'}</span>
         </div>
       </div>
@@ -323,6 +351,9 @@ function WatchCard({
         ))}
       </div>
 
+      {/* Stars and the watched date both appear only on 'watched', so they sit
+          together here — keeping them out of the footer means the episodes
+          button stays aligned across every card in a row. */}
       {item.status === 'watched' && (
         <div className={styles.stars}>
           {[1, 2, 3, 4, 5].map((n) => (
@@ -342,16 +373,15 @@ function WatchCard({
         </div>
       )}
 
-      {/* Pinned to the bottom (margin-top:auto) so the episodes button and the
-          watched date land in the same place on every card in a row. */}
-      {(isSeries || watchedOn) && (
+      {watchedOn && <div className={styles.watchedOn}>Watched {formatWatchDate(watchedOn)}</div>}
+
+      {/* Pinned to the bottom (margin-top:auto) so the episodes button lands in
+          the same place on every card in a row. */}
+      {isSeries && (
         <div className={styles.cardFooter}>
-          {isSeries && (
-            <button type="button" className={styles.episodesBtn} onClick={onOpenEpisodes}>
-              {item.totalEpisodes != null ? `${watchedEpisodeCount} / ${item.totalEpisodes} episodes` : 'Episodes'}
-            </button>
-          )}
-          {watchedOn && <div className={styles.watchedOn}>Watched {formatWatchDate(watchedOn)}</div>}
+          <button type="button" className={styles.episodesBtn} onClick={onOpenEpisodes}>
+            {item.totalEpisodes != null ? `${watchedEpisodeCount} / ${item.totalEpisodes} episodes` : 'Episodes'}
+          </button>
         </div>
       )}
     </div>

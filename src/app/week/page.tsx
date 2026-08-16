@@ -15,8 +15,21 @@ import {
 } from '@/lib/date';
 import { getNowId, taskKey } from '@/lib/helpers';
 import PeriodNav from '@/app/components/PeriodNav';
+import Skeleton, { SkeletonBlock } from '@/app/components/Skeleton';
 import type { Task } from '@/lib/types';
 import styles from './week.module.css';
+
+// A column's worth of pill placeholders, at the real pill height (12px text +
+// 6px padding + 1px border, top and bottom).
+function PillsSkeleton() {
+  return (
+    <SkeletonBlock className={styles.pills} label="Loading tasks">
+      {[0, 1, 2].map((i) => (
+        <Skeleton key={i} height={32} radius={6} />
+      ))}
+    </SkeletonBlock>
+  );
+}
 
 // ── Task pill ────────────────────────────────────────────────────────────────
 
@@ -67,6 +80,7 @@ const byScheduledAsc = (a: Task, b: Task) =>
 
 export default function WeekPage() {
   const { tasks, loading, error, openEdit, deleteTask, setRange } = useApp();
+  const showSkeleton = loading && tasks.length === 0 && !error;
   const router = useRouter();
   const [now, setNow] = useState(() => new Date());
   // Which week is on screen — navigable, independent of the "now" ticker.
@@ -113,7 +127,6 @@ export default function WeekPage() {
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && tasks.length === 0 && <div className={styles.message}>Loading…</div>}
 
       <div className={styles.grid}>
         {days.map((day) => {
@@ -141,17 +154,23 @@ export default function WeekPage() {
                   aria-hidden="true"
                 />
               </div>
-              <div className={styles.pills}>
-                {dayTasks(day).map((task) => (
-                  <TaskPill
-                    key={taskKey(task)}
-                    task={task}
-                    now={isToday && taskKey(task) === nowId}
-                    onEdit={openEdit}
-                    onDelete={deleteTask}
-                  />
-                ))}
-              </div>
+              {/* Column headers are computed from the date, not fetched, so
+                  only the pills need placeholders. */}
+              {showSkeleton ? (
+                <PillsSkeleton />
+              ) : (
+                <div className={styles.pills}>
+                  {dayTasks(day).map((task) => (
+                    <TaskPill
+                      key={taskKey(task)}
+                      task={task}
+                      now={isToday && taskKey(task) === nowId}
+                      onEdit={openEdit}
+                      onDelete={deleteTask}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen, faPiggyBank, faTrash, faWallet } from '@fortawesome/free-solid-svg-icons';
 import PeriodNav from '@/app/components/PeriodNav';
+import Skeleton, { SkeletonBlock } from '@/app/components/Skeleton';
 import { useMoney } from '@/lib/money-context';
 import { api, describeError } from '@/lib/api';
 import {
@@ -28,6 +29,23 @@ import type {
   MoneyEntryType,
 } from '@/lib/types';
 import styles from './money.module.css';
+
+const SKELETON_ROWS = 5;
+
+// Reuses .card and .row so the hairline dividers and row height match the
+// loaded day exactly — label left, amount right.
+function EntriesSkeleton() {
+  return (
+    <SkeletonBlock className={styles.card} label="Loading entries">
+      {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+        <div key={i} className={styles.row}>
+          <Skeleton height={14} width={`${55 - (i % 3) * 10}%`} radius={4} />
+          <Skeleton height={14} width={64} radius={4} style={{ marginLeft: 'auto' }} />
+        </div>
+      ))}
+    </SkeletonBlock>
+  );
+}
 
 export default function MoneyPage() {
   const { entries, loading, error, setRange, addEntry, updateEntry, deleteEntry } = useMoney();
@@ -267,11 +285,10 @@ export default function MoneyPage() {
       </form>
 
       {(error || balanceError) && <div className={styles.message}>{error ?? balanceError}</div>}
-      {!error && loading && dayEntries.length === 0 && (
-        <div className={styles.message}>Loading…</div>
-      )}
 
-      {!loading && !error && dayEntries.length === 0 ? (
+      {loading && dayEntries.length === 0 && !error ? (
+        <EntriesSkeleton />
+      ) : !loading && !error && dayEntries.length === 0 ? (
         <div className={styles.empty}>
           <FontAwesomeIcon icon={faWallet} className={styles.emptyIcon} />
           <p>Nothing logged for this day.</p>

@@ -4,7 +4,46 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFire, faListCheck, faLock, faNoteSticky, faTrophy, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { useGameData } from '@/lib/use-game-data';
 import type { Achievement, Attributes, RecentDay, StreakInfo } from '@/lib/game';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import styles from './stats.module.css';
+
+// Matches the loaded sheet section for section: the 240px radar next to the
+// four attribute rows, then the four streak cards.
+function SheetSkeleton() {
+  return (
+    <SkeletonBlock label="Loading your record">
+      <section className={styles.section}>
+        <div className={styles.sectionLabel}>Attributes</div>
+        <div className={styles.attributesCard}>
+          <Skeleton width={240} height={240} radius={12} />
+          <div className={styles.attributesList}>
+            {ATTRIBUTE_AXES.map(({ key }) => (
+              <div key={key} className={styles.attributeRow}>
+                <Skeleton height={13} width={90} radius={4} />
+                <Skeleton height={13} width={32} radius={4} style={{ marginLeft: 'auto' }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.sectionLabel}>Streaks</div>
+        <div className={styles.streakGrid}>
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className={styles.streakCard}>
+              <Skeleton width={20} height={20} radius={999} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <Skeleton height={11} width="70%" radius={4} />
+                <Skeleton height={16} width="40%" radius={4} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </SkeletonBlock>
+  );
+}
 
 const ATTRIBUTE_AXES: { key: keyof Attributes; label: string }[] = [
   { key: 'discipline', label: 'Discipline' },
@@ -43,7 +82,7 @@ export default function StatsPage() {
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && <div className={styles.message}>Loading your record…</div>}
+      {!error && loading && <SheetSkeleton />}
 
       {game && (
         <>

@@ -13,6 +13,7 @@ import {
   toDateInput,
 } from '@/lib/date';
 import PeriodNav from '@/app/components/PeriodNav';
+import Skeleton, { SkeletonBlock } from '@/app/components/Skeleton';
 import type { Task } from '@/lib/types';
 import styles from './month.module.css';
 
@@ -25,6 +26,7 @@ const byScheduledAsc = (a: Task, b: Task) =>
 
 export default function MonthPage() {
   const { tasks, loading, error, openEdit, setRange } = useApp();
+  const showSkeleton = loading && tasks.length === 0 && !error;
   const router = useRouter();
   const [monthStart, setMonthStart] = useState(() => startOfMonth(new Date()));
 
@@ -93,7 +95,6 @@ export default function MonthPage() {
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && tasks.length === 0 && <div className={styles.message}>Loading…</div>}
 
       <div className={styles.weekdayRow}>
         {WEEKDAYS.map((label) => (
@@ -124,6 +125,15 @@ export default function MonthPage() {
               <div className={isToday ? styles.dayNumberToday : styles.dayNumber}>
                 {day.getDate()}
               </div>
+              {/* The day number is derived from the date; only the task lines
+                  wait on the fetch. */}
+              {showSkeleton && (
+                <SkeletonBlock className={styles.lines} label="Loading tasks">
+                  {Array.from({ length: (day.getDate() % 3) + 1 }, (_, i) => (
+                    <Skeleton key={i} height={11} width={`${90 - i * 20}%`} radius={3} />
+                  ))}
+                </SkeletonBlock>
+              )}
               <div className={styles.lines}>
                 {dayTasks.slice(0, MAX_LINES).map((task) => (
                   <div

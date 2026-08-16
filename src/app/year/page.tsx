@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '@/lib/app-context';
 import { toDateInput } from '@/lib/date';
 import PeriodNav from '@/app/components/PeriodNav';
+import Skeleton, { SkeletonBlock } from '@/app/components/Skeleton';
 import styles from './year.module.css';
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i);
@@ -100,7 +101,6 @@ export default function YearPage() {
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
-      {!error && loading && tasks.length === 0 && <div className={styles.message}>Loading…</div>}
 
       <div className={styles.panels}>
         {MONTHS.map((month) => (
@@ -111,6 +111,7 @@ export default function YearPage() {
             current={year === now.getFullYear() && month === now.getMonth()}
             todayKey={todayKey}
             statsByDay={statsByDay}
+            loading={loading && tasks.length === 0 && !error}
             onDayClick={(key) => router.push(`/day/${key}`)}
           />
         ))}
@@ -125,10 +126,11 @@ type PanelProps = {
   current: boolean;
   todayKey: string;
   statsByDay: StatsByDay;
+  loading: boolean;
   onDayClick: (key: string) => void;
 };
 
-function MonthPanel({ year, month, current, todayKey, statsByDay, onDayClick }: PanelProps) {
+function MonthPanel({ year, month, current, todayKey, statsByDay, loading, onDayClick }: PanelProps) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const name = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'short' });
 
@@ -152,6 +154,15 @@ function MonthPanel({ year, month, current, todayKey, statsByDay, onDayClick }: 
         <span className={styles.monthName}>{name}</span>
         <span className={styles.monthPct}>{pct}</span>
       </div>
+      {/* Panel header and square count come from the calendar, not the fetch —
+          only the density of each square is data, so only it gets a placeholder. */}
+      {loading ? (
+        <SkeletonBlock className={styles.squares} label={`Loading ${name}`}>
+          {days.map(({ key }) => (
+            <Skeleton key={key} radius={3} style={{ minHeight: 0 }} />
+          ))}
+        </SkeletonBlock>
+      ) : (
       <div className={styles.squares}>
         {days.map(({ date, key, stats }) => (
           <div
@@ -169,6 +180,7 @@ function MonthPanel({ year, month, current, todayKey, statsByDay, onDayClick }: 
           />
         ))}
       </div>
+      )}
     </div>
   );
 }

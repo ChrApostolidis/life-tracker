@@ -26,6 +26,7 @@ import { api } from '@/lib/api';
 import { formatTimeLabel, startOfDay, addDays, toDateInput } from '@/lib/date';
 import { greetingWord, pickFlavorLine, pickQuote } from '@/lib/quotes';
 import type { Book } from '@/lib/types';
+import Skeleton, { SkeletonBlock } from './components/Skeleton';
 import styles from './home.module.css';
 
 const HOME_HABITS_LIMIT = 6;
@@ -164,7 +165,21 @@ export default function HomePage() {
         </div>
       </Link>
 
-      {showHabitsCard && (
+      {habitsLoading && habits.length === 0 ? (
+        <SkeletonBlock className={styles.habitsCard} label="Loading habits">
+          <div className={styles.habitsHeader}>
+            <Skeleton height={11} width={52} radius={4} />
+          </div>
+          <div className={styles.habitsList}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={styles.habitRow}>
+                <Skeleton width={18} height={18} radius={999} />
+                <Skeleton height={13} width={`${52 - i * 10}%`} radius={4} />
+              </div>
+            ))}
+          </div>
+        </SkeletonBlock>
+      ) : showHabitsCard && (
         activeHabits.length === 0 ? (
           <Link href="/habits" className={styles.habitsCardEmpty}>
             Set up your daily habits
@@ -225,7 +240,15 @@ export default function HomePage() {
         )
       )}
 
-      {game && (
+      {!game ? (
+        <SkeletonBlock className={styles.levelStrip} label="Loading level">
+          <Skeleton width={40} height={40} radius={999} />
+          <div className={styles.levelBody} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Skeleton height={13} width="45%" radius={4} />
+            <Skeleton height={5} radius={999} />
+          </div>
+        </SkeletonBlock>
+      ) : (
         <Link href="/stats" className={styles.levelStrip}>
           <div className={styles.levelBadge}>{game.level}</div>
           <div className={styles.levelBody}>
@@ -249,7 +272,27 @@ export default function HomePage() {
         </Link>
       )}
 
-      {books !== null && (
+      {books === null ? (
+        <SkeletonBlock className={styles.booksCard} label="Loading books">
+          <div className={styles.booksHeader}>
+            <Skeleton height={11} width={44} radius={4} />
+          </div>
+          <div className={styles.booksBody}>
+            <div className={styles.booksReading}>
+              <Skeleton width={40} height={60} radius={4} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <Skeleton height={13} width={140} radius={4} />
+                <Skeleton height={11} width={96} radius={4} />
+              </div>
+            </div>
+            <div className={styles.booksStrip}>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} width={28} height={42} radius={4} />
+              ))}
+            </div>
+          </div>
+        </SkeletonBlock>
+      ) : (
         <Link href="/books" className={styles.booksCard}>
           <div className={styles.booksHeader}>
             <span className={styles.snapshotLabel}>Books</span>
