@@ -6,10 +6,35 @@ import { faCheck, faTrash, faPlus, faRepeat } from '@fortawesome/free-solid-svg-
 import { useApp } from '@/lib/app-context';
 import { useHabits } from '@/lib/habits-context';
 import DayJournal from './DayJournal';
+import Skeleton, { SkeletonBlock } from './Skeleton';
 import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays, toDateInput } from '@/lib/date';
 import type { Task } from '@/lib/types';
 import { getNowId, taskKey } from '@/lib/helpers';
 import styles from './dayView.module.css';
+
+// ── Loading skeleton ───────────────────────────────────────────────────────
+
+const SKELETON_ROWS = 5;
+
+// Mirrors a Schedule section: the same 11px label, the timeline rule, and rows
+// at the real 10px/16px padding with the 68px time column preserved.
+function ScheduleSkeleton() {
+  return (
+    <section className={styles.section}>
+      <div className={styles.sectionLabel}>Schedule</div>
+      <SkeletonBlock className={styles.timeline} label="Loading schedule">
+        <div className={styles.timelineRule} />
+        {Array.from({ length: SKELETON_ROWS }, (_, i) => (
+          <div key={i} className={styles.row}>
+            <Skeleton width={40} height={13} radius={4} />
+            <Skeleton width={10} height={10} radius={999} style={{ margin: '0 33px 0 18px' }} />
+            <Skeleton height={14} width={`${55 - (i % 3) * 12}%`} radius={4} />
+          </div>
+        ))}
+      </SkeletonBlock>
+    </section>
+  );
+}
 
 // ── Timeline Row ───────────────────────────────────────────────────────────
 
@@ -262,10 +287,10 @@ export default function DayView({ date }: { date: Date }) {
         </section>
       )}
 
-      {totalTasks === 0 && overdue.length === 0 && !error && (
-        <div className={styles.empty}>
-          {loading ? 'Loading…' : 'Nothing scheduled. Add a task to get started.'}
-        </div>
+      {totalTasks === 0 && overdue.length === 0 && !error && loading && <ScheduleSkeleton />}
+
+      {totalTasks === 0 && overdue.length === 0 && !error && !loading && (
+        <div className={styles.empty}>Nothing scheduled. Add a task to get started.</div>
       )}
 
       {startOfDay(date).getTime() <= startOfDay(now).getTime() && <DayJournal date={date} />}

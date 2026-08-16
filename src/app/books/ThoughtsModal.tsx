@@ -4,6 +4,7 @@ import { useEffect, useState, type KeyboardEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../components/Modal';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import { api, describeError } from '@/lib/api';
 import { formatRelativeTime } from '@/lib/date';
 import type { Book, Note } from '@/lib/types';
@@ -71,7 +72,18 @@ export default function ThoughtsModal({ book, onClose }: { book: Book | null; on
 
           <div className={styles.list}>
             {error && <div className={styles.message}>{error}</div>}
-            {!error && loading && notes.length === 0 && <div className={styles.message}>Loading…</div>}
+            {!error && loading && notes.length === 0 && (
+              <SkeletonBlock label="Loading thoughts">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className={styles.entry}>
+                    <div className={styles.entryHeader}>
+                      <Skeleton height={11} width={72} radius={4} />
+                    </div>
+                    <Skeleton height={13} width={`${90 - i * 15}%`} radius={4} />
+                  </div>
+                ))}
+              </SkeletonBlock>
+            )}
             {!loading && !error && notes.length === 0 && (
               <div className={styles.message}>No thoughts yet — add the first one below.</div>
             )}

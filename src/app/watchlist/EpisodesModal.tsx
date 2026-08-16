@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import Modal from '../components/Modal';
+import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import { useWatch } from '@/lib/watch-context';
 import { fetchSeason, fetchSeries, type TmdbEpisode, type TmdbSeasonSummary } from '@/lib/tmdb';
 import type { WatchItem } from '@/lib/types';
@@ -118,7 +119,13 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
           <div className={styles.itemTitle}>{item.title}</div>
 
           {error && <div className={styles.message}>{error}</div>}
-          {!error && loadingSeries && <div className={styles.message}>Loading seasons…</div>}
+          {!error && loadingSeries && (
+            <SkeletonBlock className={styles.seasonPills} label="Loading seasons">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} width={52} height={29} radius={999} />
+              ))}
+            </SkeletonBlock>
+          )}
 
           {!loadingSeries && seasons.length > 0 && (
             <>
@@ -141,7 +148,17 @@ export default function EpisodesModal({ item, onClose }: { item: WatchItem | nul
               </div>
 
               <div className={styles.episodeList}>
-                {loadingEpisodes && <div className={styles.message}>Loading episodes…</div>}
+                {loadingEpisodes && (
+                  <SkeletonBlock label="Loading episodes">
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <div key={i} className={styles.episodeRow}>
+                        <Skeleton width={18} height={18} radius={999} />
+                        <Skeleton width={40} height={11} radius={4} />
+                        <Skeleton height={13} width={`${60 - (i % 3) * 12}%`} radius={4} />
+                      </div>
+                    ))}
+                  </SkeletonBlock>
+                )}
                 {!loadingEpisodes &&
                   currentEpisodes.map((ep) => {
                     const watched = selectedSeason != null && watchedKeys.has(`${selectedSeason}-${ep.episodeNumber}`);
