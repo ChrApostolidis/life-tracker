@@ -118,7 +118,7 @@ function CaptureForm({
   onVoiceCaptured: (transcript: string) => void;
   onSaved: () => void;
 }) {
-  const { addTask, updateTask, deleteTask, addNote, updateNote, deleteNote } = useApp();
+  const { addTask, updateTask, unscheduleTask, deleteTask, addNote, updateNote, deleteNote } = useApp();
   const isTaskEdit = task !== null;
   const isNoteEdit = note !== null;
   // Note mode (new capture or edit): multi-line body, no date fields.
@@ -130,6 +130,7 @@ function CaptureForm({
   );
   const [time, setTime] = useState(task?.scheduledAt ? splitDateTime(task.scheduledAt).time : '');
   const [recurrence, setRecurrence] = useState<Recurrence | null>(task?.recurrence ?? null);
+  const [dateError, setDateError] = useState<string | null>(null);
  
   const isExistingRecurring = isTaskEdit && task?.recurrence != null;
 
@@ -195,15 +196,32 @@ function CaptureForm({
       return;
     }
 
-    // A date alone schedules the task; the time is optional and defaults to the
-    // start of the day. Without a date the task stays unscheduled (inbox).
-    const scheduledAt = date ? combineDateTime(toDateInput(date), time || '00:00') : null;
+    // Clearing the date on an existing scheduled task means "back to the inbox",
+    // which PATCH can't express (null = unchanged) — it needs its own endpoint.
+    if (isTaskEdit && task && !date && task.scheduledAt) {
+      if (trimmedTitle !== task.title) void updateTask(task.id, { title: trimmedTitle });
+      void unscheduleTask(task.id);
+      onSaved();
+      return;
+    }
+
+    // A date alone schedules the task. Blanking the time on a task that already
+    // had one keeps its original time-of-day: there's no all-day flag in the
+    // model, so defaulting to 00:00 would silently reschedule it to midnight.
+    // A brand-new task with no time starts at the top of the day.
+    const fallbackTime =
+      isTaskEdit && task?.scheduledAt ? splitDateTime(task.scheduledAt).time : '00:00';
+    const scheduledAt = date ? combineDateTime(toDateInput(date), time || fallbackTime) : null;
+    if (date && scheduledAt === null) {
+      setDateError('That date and time did not parse. Check the fields and try again.');
+      return;
+    }
+    setDateError(null);
     // Weekly derives its weekday from the picked date — 0 (Sun)–6 (Sat), same
     // convention the backend expects, no separate day picker needed.
     const recurrenceDay = recurrence === 'weekly' && date ? date.getDay() : null;
 
     if (isTaskEdit && task) {
-   
       void updateTask(task.id, { title: trimmedTitle, scheduledAt, recurrence, recurrenceDay });
     } else {
       void addTask({ title: trimmedTitle, scheduledAt, recurrence, recurrenceDay });
@@ -258,6 +276,7 @@ function CaptureForm({
         </div>
       )}
 
+      {dateError && <div className={styles.voiceError}>{dateError}</div>}
       {speech.error && <div className={styles.voiceError}>{speech.error}</div>}
 
       <div className={styles.footer}>

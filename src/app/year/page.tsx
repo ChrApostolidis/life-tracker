@@ -134,18 +134,15 @@ function MonthPanel({ year, month, current, todayKey, statsByDay, loading, onDay
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const name = new Date(year, month, 1).toLocaleDateString('en-US', { month: 'short' });
 
-  let total = 0;
-  let done = 0;
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const date = new Date(year, month, i + 1);
     const key = toDateInput(date);
-    const stats = statsByDay.get(key);
-    if (stats) {
-      total += stats.total;
-      done += stats.done;
-    }
-    return { date, key, stats };
+    return { date, key, stats: statsByDay.get(key) };
   });
+  // Derived after the fact rather than accumulated inside the map — mutating a
+  // variable during render is what react-hooks/immutability flags.
+  const total = days.reduce((sum, d) => sum + (d.stats?.total ?? 0), 0);
+  const done = days.reduce((sum, d) => sum + (d.stats?.done ?? 0), 0);
   const pct = total > 0 ? `${Math.round((done / total) * 100)}%` : '—';
 
   return (

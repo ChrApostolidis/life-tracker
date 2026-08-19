@@ -36,6 +36,7 @@ type AppCtx = {
   setRange: (from: string, to: string) => void;
   addTask: (input: TaskInput) => Promise<void>;
   updateTask: (id: string, patch: TaskPatch) => Promise<void>;
+  unscheduleTask: (id: string) => Promise<void>;
   toggleComplete: (task: Task) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   addNote: (input: NoteInput) => Promise<void>;
@@ -242,6 +243,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 
   // Delete a task. If it's a recurring series, the backend will delete all occurrences in the visible window.
+  // Moving a task back to the inbox. Separate from updateTask because PATCH
+  // treats null as "leave unchanged", so clearing the date needs its own call.
+  const unscheduleTask = useCallback(async (id: string) => {
+    const snapshot = tasksRef.current;
+    setTasks((prev) => prev.filter((t) => t.id !== id)); // leaves the current date window
+    try {
+      await api.unschedule(id);
+      await refresh();
+      void refreshOverdue();
+      bumpTasks();
+    } catch (e) {
+      setTasks(snapshot);
+      setError(describeError(e, 'Could not move task to the inbox'));
+    }
+  }, [bumpTasks, refresh, refreshOverdue]);
+
   const deleteTask = useCallback(async (id: string) => {
     const snapshot = tasksRef.current;
     const overdueSnapshot = overdueTasksRef.current;
@@ -369,6 +386,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setRange,
         addTask,
         updateTask,
+        unscheduleTask,
         toggleComplete,
         deleteTask,
         addNote,

@@ -142,6 +142,14 @@ export default function WeekPage() {
               role="button"
               tabIndex={0}
               onClick={() => router.push(`/day/${toDateInput(day)}`)}
+              // role="button" promises Enter and Space work; without this the
+              // column was reachable by keyboard but not usable from it.
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(`/day/${toDateInput(day)}`);
+                }
+              }}
             >
               <div className={styles.columnHeader}>
                 <span className={styles.weekday}>

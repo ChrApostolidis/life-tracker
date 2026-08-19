@@ -34,6 +34,8 @@ export default function VoiceConfirm({ transcript, kind, prefillDate, onRerecord
     if (kind === 'note') {
       void addNote({ body: trimmed, source: 'voice', rawTranscript: transcript });
     } else {
+      // combineDateTime returns null on malformed input; a null here just means
+      // the capture stays unscheduled rather than throwing mid-save.
       const scheduledAt = date ? combineDateTime(toDateInput(date), time || '00:00') : null;
       void addTask({ title: trimmed, scheduledAt, source: 'voice', rawTranscript: transcript });
     }
