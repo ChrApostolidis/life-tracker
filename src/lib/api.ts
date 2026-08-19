@@ -85,6 +85,11 @@ export const api = {
   update: (id: string, patch: TaskPatch) =>
     request<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: patch }),
 
+  // PATCH cannot clear a field (null = unchanged), so moving a task back to the
+  // inbox has its own verb. Also clears any recurrence — see WatchItemService's
+  // sibling reasoning in the backend.
+  unschedule: (id: string) => request<Task>(`/api/tasks/${id}/unschedule`, { method: 'POST' }),
+
   remove: (id: string) => request<void>(`/api/tasks/${id}`, { method: 'DELETE' }),
 
   complete: (id: string) => request<Task>(`/api/tasks/${id}/complete`, { method: 'POST' }),

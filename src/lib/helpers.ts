@@ -19,10 +19,12 @@ export function getNowId(scheduled: Task[], now: Date): string | null {
   for (let i = 0; i < sorted.length; i++) {
     if (sorted[i].completedAt) continue;
     const start = timeToMins(formatTimeLabel(sorted[i].scheduledAt!));
+    // The last row of the day has no next start to bound it, so fall back to
+    // its own duration and only then to a flat two hours.
     const end =
       i + 1 < sorted.length
         ? timeToMins(formatTimeLabel(sorted[i + 1].scheduledAt!))
-        : start + 120;
+        : start + (sorted[i].durationMin ?? 120);
     if (mins >= start && mins < end) return taskKey(sorted[i]);
   }
   return null;

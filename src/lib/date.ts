@@ -7,9 +7,12 @@ export function isSameDay(iso: string, day: Date): boolean {
   );
 }
 
-// "YYYY-MM-DD" + "HH:MM" → ISO string
-export function combineDateTime(date: string, time: string): string {
-  return new Date(`${date}T${time}:00`).toISOString();
+// "YYYY-MM-DD" + "HH:MM" → ISO string, or null if either half is malformed.
+// Returns null rather than throwing: `new Date('garbage').toISOString()` raises
+// a RangeError, which nothing up the call stack was catching.
+export function combineDateTime(date: string, time: string): string | null {
+  const d = new Date(`${date}T${time}:00`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 // Date → "YYYY-MM-DD" in local time — the date half that combineDateTime expects.
