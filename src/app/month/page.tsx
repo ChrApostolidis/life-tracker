@@ -13,7 +13,7 @@ import {
   toDateInput,
 } from '@/lib/date';
 import PeriodNav from '@/app/components/PeriodNav';
-import Skeleton, { SkeletonBlock } from '@/app/components/Skeleton';
+import Skeleton from '@/app/components/Skeleton';
 import type { Task } from '@/lib/types';
 import styles from './month.module.css';
 
@@ -104,7 +104,7 @@ export default function MonthPage() {
         ))}
       </div>
 
-      <div className={styles.grid}>
+      <div className={styles.grid} aria-busy={showSkeleton || undefined}>
         {days.map((day) => {
           const key = toDateInput(day);
           const isToday = startOfDay(day).getTime() === todayTime;
@@ -125,33 +125,48 @@ export default function MonthPage() {
               <div className={isToday ? styles.dayNumberToday : styles.dayNumber}>
                 {day.getDate()}
               </div>
-              {/* The day number is derived from the date; only the task lines
-                  wait on the fetch. */}
-              {showSkeleton && (
-                <SkeletonBlock className={styles.lines} label="Loading tasks">
-                  {Array.from({ length: (day.getDate() % 3) + 1 }, (_, i) => (
-                    <Skeleton key={i} height={11} width={`${90 - i * 20}%`} radius={3} />
-                  ))}
-                </SkeletonBlock>
-              )}
-              <div className={styles.lines}>
-                {dayTasks.slice(0, MAX_LINES).map((task) => (
-                  <div
-                    key={task.id}
-                    className={lineClass(task)}
-                    onClick={(e) => handleLineClick(e, task)}
-                  >
-                    {task.title}
+              {/* The day number comes from the date; only the task content waits
+                  on the fetch. MAX_LINES bars in every cell, identical: a full
+                  day is exactly what the loaded view can show, so the geometry
+                  matches without the count implying anything per day. Both
+                  .lines and .dots are rendered because the month swaps between
+                  them by media query — .dots is the mobile view of the same
+                  content, and filling only .lines left phones blank. */}
+              {showSkeleton ? (
+                <>
+                  <div className={styles.lines}>
+                    {Array.from({ length: MAX_LINES }, (_, i) => (
+                      <Skeleton key={i} height={14} radius={4} />
+                    ))}
                   </div>
-                ))}
-                {overflow > 0 && <div className={styles.moreLine}>+{overflow} more</div>}
-              </div>
-              <div className={styles.dots}>
-                {dayTasks.slice(0, MAX_LINES).map((task) => (
-                  <span key={task.id} className={dotClass(task)} />
-                ))}
-                {overflow > 0 && <span className={styles.moreDot}>+{overflow}</span>}
-              </div>
+                  <div className={styles.dots}>
+                    {Array.from({ length: MAX_LINES }, (_, i) => (
+                      <Skeleton key={i} width={6} height={6} radius={999} />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.lines}>
+                    {dayTasks.slice(0, MAX_LINES).map((task) => (
+                      <div
+                        key={task.id}
+                        className={lineClass(task)}
+                        onClick={(e) => handleLineClick(e, task)}
+                      >
+                        {task.title}
+                      </div>
+                    ))}
+                    {overflow > 0 && <div className={styles.moreLine}>+{overflow} more</div>}
+                  </div>
+                  <div className={styles.dots}>
+                    {dayTasks.slice(0, MAX_LINES).map((task) => (
+                      <span key={task.id} className={dotClass(task)} />
+                    ))}
+                    {overflow > 0 && <span className={styles.moreDot}>+{overflow}</span>}
+                  </div>
+                </>
+              )}
             </div>
           );
         })}

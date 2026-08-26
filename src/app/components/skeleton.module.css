@@ -1,27 +1,47 @@
-/* A pulse rather than the usual sweeping shimmer: a shimmer needs a moving
-   linear-gradient, and this app's visual rules allow no gradients outside the
-   hero accent glow. Opacity on a --bg-hover block reads the same at a glance
-   and stays inside the token palette. */
+/* A sweeping wave, the shape Instagram and most large platforms use: a light
+   band travels left to right across a flat base block.
+
+   This needs a moving linear-gradient, which is the one documented exception to
+   the "no gradients" visual rule (see CLAUDE.md). The band is --text-primary at
+   6%, not white, so it stays inside the palette on a --bg-hover base. */
 .skeleton {
+  position: relative;
+  overflow: hidden;
   background: var(--bg-hover);
-  animation: skeletonPulse 1.4s ease-in-out infinite;
   /* Blocks are placeholders, not content — never let one collapse to nothing. */
   flex-shrink: 0;
 }
 
-@keyframes skeletonPulse {
-  0%,
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Starts fully off the left edge so the first pass sweeps in rather than
+     appearing mid-block. */
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(236, 237, 238, 0.06) 50%,
+    transparent 100%
+  );
+  animation: skeletonWave 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonWave {
   100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.45;
+    transform: translateX(100%);
   }
 }
 
+/* A band travelling across the screen is exactly the motion this setting exists
+   to suppress, so drop it entirely rather than slowing it down. */
 @media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+
   .skeleton {
-    animation: none;
     opacity: 0.7;
   }
 }
