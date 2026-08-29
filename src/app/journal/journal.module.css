@@ -1,0 +1,502 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin: 4px 0 8px;
+}
+
+.meta {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.message {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Composer ── */
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.composerTrigger {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  text-align: left;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.composerTrigger:hover {
+  color: var(--text-primary);
+}
+
+.composerTitle,
+.composerBody,
+.editBody {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  /* 16px keeps iOS from zooming the viewport on focus. */
+  font-size: 16px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.composerBody,
+.editBody {
+  resize: vertical;
+}
+
+.composerTitle:focus,
+.composerBody:focus,
+.editBody:focus,
+.search:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.1);
+}
+
+.composerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tagField {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+.tagRemove {
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  cursor: pointer;
+}
+
+.tagRemove svg {
+  width: 9px;
+  height: 9px;
+}
+
+.tagInput {
+  flex: 1;
+  min-width: 80px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  outline: none;
+}
+
+.composerDate {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color-scheme: dark;
+}
+
+.composerActions,
+.rowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.saveBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(107, 155, 209, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ghostBtn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.ghostBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ── Filters ── */
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.filterPill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.filterPill:hover {
+  color: var(--text-primary);
+}
+
+.filterPillActive,
+.filterPillActive:hover {
+  background: var(--accent-soft);
+  border-color: rgba(107, 155, 209, 0.4);
+  color: var(--accent);
+}
+
+.filterCount {
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.search {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  margin-bottom: 24px;
+}
+
+/* ── Timeline + month jumper ── */
+.body {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.timeline {
+  flex: 1;
+  min-width: 0;
+}
+
+.month {
+  margin-bottom: 24px;
+}
+
+.monthHeader {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin: 0 0 8px;
+  /* Sticks under the page's own top padding while scrolling a long month. */
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 8px 0;
+  z-index: 1;
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+.row:hover {
+  background: var(--bg-hover);
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rowDate {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.rowKind {
+  font-size: 10px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.rowTag {
+  font-size: 10px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.rowDelete {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 2px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.row:hover .rowDelete,
+.rowDelete:focus-visible {
+  opacity: 1;
+}
+
+.rowDelete:hover {
+  color: var(--mic-active);
+}
+
+.rowDelete svg {
+  width: 12px;
+  height: 12px;
+}
+
+.rowTitle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.rowBody {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  /* Two lines in the timeline; the full text lives behind the expand. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rowFull {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.stars svg {
+  width: 10px;
+  height: 10px;
+}
+
+.starFilled {
+  color: var(--warning);
+}
+
+.starEmpty {
+  color: var(--border);
+}
+
+.jumper {
+  position: sticky;
+  top: 48px;
+  width: 150px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jumperLink {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.jumperLink:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.jumperCount {
+  color: var(--text-muted);
+}
+
+/* ── Empty state ── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 24px;
+  }
+
+  .title {
+    font-size: 28px;
+    letter-spacing: -0.4px;
+  }
+
+  .body {
+    flex-direction: column;
+  }
+
+  /* The jumper becomes a horizontal strip above the timeline rather than a
+     sidebar there is no room for. */
+  .jumper {
+    position: static;
+    order: -1;
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 6px;
+  }
+
+  .jumperLink {
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+}
