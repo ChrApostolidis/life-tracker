@@ -8,6 +8,7 @@ import {
   faHouse,
   faListCheck,
   faNoteSticky,
+  faPenNib,
   faTableCellsLarge,
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
@@ -29,6 +30,7 @@ export const navItems: NavItem[] = [
   { label: "Month", href: "/month", icon: faCalendarDays },
   { label: "Year", href: "/year", icon: faTableCellsLarge },
   { label: "Habits", href: "/habits", icon: faListCheck },
+  { label: "Journal", href: "/journal", icon: faPenNib },
   { label: "Notes", href: "/notes", icon: faNoteSticky },
   { label: "Money", href: "/money", icon: faWallet },
   { label: "Books", href: "/books", icon: faBook },
