@@ -2,7 +2,7 @@
 // levels, streaks, attributes, and achievements. No stored game state — every
 // number here is re-derived from the same data the rest of the app already
 // shows, so there's nothing to desync or cheat.
-import type { DayNote, HabitCheck, MoneyEntry, Note, Task } from './types';
+import type { DayNote, HabitCheck, JournalEntry, MoneyEntry, Note, Task } from './types';
 import { addDays, fromDateInput, toDateInput } from './date';
 
 // ── XP economy (tune here) ──────────────────────────────────────────────────
@@ -22,7 +22,7 @@ export const XP = {
   streak100: 1000,
   habitCheck: 4,
   habitCheckXpCapPerDay: 5, // anti-cheese: 20 habits checked in a day still earns 5×4
-  journalEntry: 12, // higher than noteWritten — an entry is more effort, and the schema allows only one per day so no cap is needed
+  journalEntry: 12, // higher than noteWritten — an entry is more effort. Awarded per DAY, not per entry: journal_entries allows many a day, so paying per entry would make XP farmable by pressing Enter.
 } as const;
 
 const LEVEL_TITLES: { minLevel: number; title: string }[] = [
@@ -95,6 +95,7 @@ export type GameInput = {
   money: MoneyEntry[];
   habitChecks: HabitCheck[];
   dayNotes: DayNote[];
+  journalEntries: JournalEntry[];
   inboxCount: number;
   now: Date;
 };
@@ -171,14 +172,19 @@ function titleForLevel(level: number): string {
 
 // ── Main computation ─────────────────────────────────────────────────────
 
-export function computeGameState({ tasks, notes, money, habitChecks, dayNotes, inboxCount, now }: GameInput): GameState {
+export function computeGameState({ tasks, notes, money, habitChecks, dayNotes, journalEntries, inboxCount, now }: GameInput): GameState {
   const todayKey = toDateInput(now);
 
   const liveTasks = tasks.filter((t) => !t.deletedAt);
   const liveNotes = notes.filter((n) => !n.deletedAt);
   const liveMoney = money.filter((m) => !m.deletedAt);
   const liveDayNotes = dayNotes.filter((d) => !d.deletedAt);
-  const journalEntryDays = new Set(liveDayNotes.map((d) => d.entryDate));
+  const dayNoteDays = new Set(liveDayNotes.map((d) => d.entryDate));
+  // Collapsed to days at the boundary on purpose: journal_entries allows many
+  // rows per day, and every use below (XP, streak, Reflection, achievement)
+  // must count the day once. Never iterate the entries themselves.
+  const longFormDays = new Set(journalEntries.filter((e) => !e.deletedAt).map((e) => e.entryDate));
+  const journalEntryDays = new Set([...dayNoteDays, ...longFormDays]);
 
   // ── Day/month buckets ──
   const scheduledByDay = new Map<string, { total: number; completed: number }>();
@@ -243,7 +249,9 @@ export function computeGameState({ tasks, notes, money, habitChecks, dayNotes, i
   const activeDays = new Set(completedByDay.keys());
   const moneyDays = new Set(moneyByDay.keys());
   // Union, not a switch to day-notes-only — this preserves the streak history
-  // the 14 existing standalone notes already earned.
+  // the existing standalone notes already earned. journalEntryDays now covers
+  // both the day journal and long-form entries, so adding a third source here
+  // would double nothing but dropping either would retroactively zero a streak.
   const journalDays = new Set([...notesByDay.keys(), ...journalEntryDays]);
   const noSpendDays = new Set(
     [...moneyByDay.entries()].filter(([, b]) => b.spentCents === 0).map(([k]) => k),
@@ -400,8 +408,9 @@ export function computeGameState({ tasks, notes, money, habitChecks, dayNotes, i
   });
   const steadyHandRun = habitRuns.find((r) => r.length >= 30);
 
-  // Specifically day-journal entries, not the journalDays union — this
-  // achievement is about the journal feature itself, not notes in general.
+  // The journal feature itself — day-journal entries and long-form entries
+  // both count — rather than the wider journalDays union, which also folds in
+  // standalone notes from /notes.
   const dearDiaryRun = computeRuns(journalEntryDays).find((r) => r.length >= 30);
 
   const voiceCandidates = [
