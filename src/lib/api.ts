@@ -4,6 +4,9 @@ import type {
   BookPatch,
   DayNote,
   DayNoteInput,
+  JournalEntry,
+  JournalEntryInput,
+  JournalEntryPatch,
   EpisodeWatch,
   EpisodeWatchResponse,
   Habit,
@@ -177,6 +180,20 @@ export const api = {
     request<DayNote>(`/api/day-notes/${date}`, { method: 'POST', body: input }),
 
   removeDayNote: (date: string) => request<void>(`/api/day-notes/${date}`, { method: 'DELETE' }),
+
+  // Long-form journal entries. Unlike day notes these have ids and allow many
+  // per day, so they are addressed by id, not by date.
+  listJournalEntries: () => request<JournalEntry[]>('/api/journal-entries'),
+
+  createJournalEntry: (input: JournalEntryInput) =>
+    request<JournalEntry>('/api/journal-entries', { method: 'POST', body: input }),
+
+  // Blank body is a 400 here, not a delete — use removeJournalEntry.
+  updateJournalEntry: (id: string, patch: JournalEntryPatch) =>
+    request<JournalEntry>(`/api/journal-entries/${id}`, { method: 'PATCH', body: patch }),
+
+  removeJournalEntry: (id: string) =>
+    request<void>(`/api/journal-entries/${id}`, { method: 'DELETE' }),
 
   // Watch items: all non-deleted, newest first. No range — single user, tiny data.
   listWatchItems: () => request<WatchItem[]>('/api/watch-items'),

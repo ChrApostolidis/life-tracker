@@ -252,3 +252,59 @@ export type EpisodeWatchResponse = {
   episodeWatch: EpisodeWatch;
   watchItem: WatchItem;
 };
+
+// ── Journal ──────────────────────────────────────────────────────────────
+
+// Long-form journal writing. Distinct from DayNote: there is deliberately no
+// one-per-day constraint, so several entries can share an entryDate. DayNote
+// stays the "how did the day go" box on DayView; this is the writing surface.
+export type JournalEntry = {
+  id: string;
+  title: string | null;
+  body: string;
+  // Comma-separated names, same snapshot convention as WatchItem.genres.
+  tags: string | null;
+  // Local 'YYYY-MM-DD': the day the entry is *about*, not necessarily when it
+  // was written. Defaults to today server-side when omitted on create.
+  entryDate: string;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type JournalEntryInput = {
+  title?: string | null;
+  body: string;
+  tags?: string | null;
+  entryDate?: string;
+};
+
+// null/absent = leave unchanged. A blank body is a 400, not a delete — journal
+// entries have their own DELETE endpoint, unlike date-addressed day notes.
+export type JournalEntryPatch = Partial<
+  Pick<JournalEntry, 'title' | 'body' | 'tags' | 'entryDate'>
+>;
+
+const MAX_TAGS = 5;
+
+export function parseTags(tags: string | null): string[] {
+  if (!tags) return [];
+  return tags.split(',').map((t) => t.trim()).filter(Boolean);
+}
+
+// Trims, drops blanks, de-duplicates case-insensitively, and caps the count.
+// Returns null rather than '' so an empty tag list never round-trips as a tag.
+export function serializeTags(tags: string[]): string | null {
+  const seen = new Set<string>();
+  const kept: string[] = [];
+  for (const raw of tags) {
+    const tag = raw.trim();
+    if (!tag) continue;
+    const key = tag.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    kept.push(tag);
+    if (kept.length === MAX_TAGS) break;
+  }
+  return kept.length > 0 ? kept.join(', ') : null;
+}
