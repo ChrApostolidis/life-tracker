@@ -76,6 +76,8 @@ export function JournalProvider({ children }: { children: ReactNode }) {
       title: input.title ?? null,
       body: input.body,
       tags: input.tags ?? null,
+      source: input.source ?? 'text',
+      rawTranscript: input.rawTranscript ?? null,
       // Mirrors the server default so the row lands in the right month
       // immediately rather than jumping once the response arrives.
       entryDate: input.entryDate ?? toDateInput(new Date()),
