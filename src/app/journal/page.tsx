@@ -1,16 +1,21 @@
 'use client';
 
-import { useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenNib, faStar, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faMicrophone, faPenNib, faStar, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useJournal } from '@/lib/journal-context';
+import { useSpeechRecognition } from '@/lib/use-speech-recognition';
 import { fromDateInput, toDateInput } from '@/lib/date';
 import { parseTags, serializeTags, type DayNote, type JournalEntry } from '@/lib/types';
 import Skeleton, { SkeletonBlock } from '../components/Skeleton';
 import styles from './journal.module.css';
 
 const SKELETON_ROWS = 6;
+
+type VoiceLang = 'el-GR' | 'en-US';
+// Shared with CaptureModal so the language choice follows you across surfaces.
+const VOICE_LANG_KEY = 'lt-voice-lang';
 
 // One timeline over two different tables, so rows carry their source with them.
 type Row =
@@ -60,12 +65,70 @@ export default function JournalPage() {
   const [tagDraft, setTagDraft] = useState('');
   const [draftDate, setDraftDate] = useState(() => toDateInput(new Date()));
 
+  // ── Voice capture (speech-to-text only; no audio is recorded or stored) ──
+  const speech = useSpeechRecognition();
+  const [voiceLang, setVoiceLang] = useState<VoiceLang>('el-GR');
+  // The body as it stood when recording began. Dictation *appends* to it rather
+  // than replacing, unlike quick capture — a journal entry is usually built up
+  // in passes, typing some and speaking some. State rather than a ref because
+  // the live preview renders from it.
+  const [bodyBeforeVoice, setBodyBeforeVoice] = useState('');
+  // Non-null once anything has been dictated into this draft, so the original
+  // transcript can be saved alongside the edited text.
+  const [voiceTranscript, setVoiceTranscript] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(VOICE_LANG_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (stored === 'el-GR' || stored === 'en-US') setVoiceLang(stored);
+  }, []);
+
+  function toggleVoiceLang() {
+    const next: VoiceLang = voiceLang === 'el-GR' ? 'en-US' : 'el-GR';
+    setVoiceLang(next);
+    window.localStorage.setItem(VOICE_LANG_KEY, next);
+  }
+
+  function toggleRecording() {
+    if (speech.listening) {
+      speech.stop();
+      return;
+    }
+    setBodyBeforeVoice(draftBody);
+    speech.reset();
+    speech.start(voiceLang);
+  }
+
+  // Recording ended (mic tapped again, or auto-stop on silence): fold the
+  // transcript into the body so it can be edited like anything else.
+  useEffect(() => {
+    if (speech.listening || !speech.transcript) return;
+    const spoken = speech.transcript.trim();
+    if (!spoken) return;
+    // Syncing from an external system (the Web Speech API), which is what an
+    // effect is for. The hook surfaces its result as state rather than a
+    // callback, and stop() returns before the final result flushes, so the
+    // commit cannot happen in the click handler.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDraftBody(bodyBeforeVoice ? `${bodyBeforeVoice.trimEnd()} ${spoken}` : spoken);
+    setVoiceTranscript((prev) => (prev ? `${prev} ${spoken}` : spoken));
+  }, [speech.listening, speech.transcript, bodyBeforeVoice]);
+
+  // While recording, show what has been heard so far appended to the body.
+  const liveBody = speech.listening
+    ? [bodyBeforeVoice, speech.transcript, speech.interimTranscript]
+        .filter(Boolean)
+        .join(' ')
+    : draftBody;
+
   function resetComposer() {
     setDraftTitle('');
     setDraftBody('');
     setDraftTags([]);
     setTagDraft('');
     setDraftDate(toDateInput(new Date()));
+    setVoiceTranscript(null);
+    speech.reset();
     setComposerOpen(false);
   }
 
@@ -86,6 +149,7 @@ export default function JournalPage() {
   }
 
   function handleSave() {
+    if (speech.listening) return; // saving mid-dictation would drop the tail
     const body = draftBody.trim();
     if (!body) return;
     // A tag half-typed when Save is pressed should still count.
@@ -95,6 +159,8 @@ export default function JournalPage() {
       body,
       tags,
       entryDate: draftDate,
+      source: voiceTranscript ? 'voice' : 'text',
+      rawTranscript: voiceTranscript,
     });
     resetComposer();
   }
@@ -185,10 +251,11 @@ export default function JournalPage() {
             />
             <textarea
               className={styles.composerBody}
-              placeholder="What's on your mind?"
-              value={draftBody}
+              placeholder={speech.listening ? 'Listening…' : "What's on your mind?"}
+              value={liveBody}
               onChange={(e) => setDraftBody(e.target.value)}
               onKeyDown={handleComposerKeyDown}
+              readOnly={speech.listening}
               rows={6}
             />
             <div className={styles.composerRow}>
@@ -222,7 +289,37 @@ export default function JournalPage() {
                 onChange={(e) => setDraftDate(e.target.value)}
               />
             </div>
+            {speech.error && <div className={styles.voiceError}>{speech.error}</div>}
+
             <div className={styles.composerActions}>
+              <button
+                type="button"
+                className={[styles.micBtn, speech.listening ? styles.micBtnActive : '']
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={toggleRecording}
+                disabled={!speech.supported}
+                title={
+                  speech.supported
+                    ? speech.listening
+                      ? 'Stop recording'
+                      : 'Dictate into this entry'
+                    : 'Voice capture needs Chrome or Edge on a secure connection'
+                }
+                aria-label={speech.listening ? 'Stop recording' : 'Record voice'}
+              >
+                <FontAwesomeIcon icon={faMicrophone} />
+              </button>
+              <button
+                type="button"
+                className={styles.langChip}
+                onClick={toggleVoiceLang}
+                disabled={speech.listening}
+                title="Voice language"
+              >
+                {voiceLang === 'el-GR' ? 'EL' : 'EN'}
+              </button>
+              <div className={styles.actionsSpacer} />
               <button type="button" className={styles.ghostBtn} onClick={resetComposer}>
                 Cancel
               </button>
@@ -230,7 +327,7 @@ export default function JournalPage() {
                 type="button"
                 className={styles.saveBtn}
                 onClick={handleSave}
-                disabled={!draftBody.trim()}
+                disabled={!draftBody.trim() || speech.listening}
               >
                 Save
               </button>

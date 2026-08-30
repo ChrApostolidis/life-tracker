@@ -42,6 +42,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  /* The mic's 6px glow ring would otherwise be clipped at this card's edge. */
+  overflow: visible;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -499,4 +501,80 @@
     border: 1px solid var(--border);
     border-radius: 999px;
   }
+}
+
+/* ── Voice capture ── */
+/* Pushes Cancel/Save to the right, leaving the mic and language chip left. */
+.actionsSpacer {
+  flex: 1;
+}
+
+.micBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.micBtn:hover:enabled {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.micBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Recording: red fill + 6px accent ring, matching the capture modal. */
+.micBtnActive,
+.micBtnActive:hover {
+  background: var(--mic-active);
+  border-color: var(--mic-active);
+  color: var(--bg);
+  box-shadow: 0 0 0 6px var(--accent-soft);
+}
+
+.langChip {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.langChip:hover:enabled {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.langChip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.voiceError {
+  font-size: 12px;
+  color: var(--mic-active);
+}
+
+/* The composer card clips at its own edge, which would cut the mic's glow ring
+   in half. Bleed padding gives the clip box room; the negative margin cancels
+   the padding's effect on layout. */
+.composerActions {
+  align-items: center;
+  padding: 8px;
+  margin: -8px;
 }
