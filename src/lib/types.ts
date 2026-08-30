@@ -264,6 +264,8 @@ export type JournalEntry = {
   body: string;
   // Comma-separated names, same snapshot convention as WatchItem.genres.
   tags: string | null;
+  source: 'text' | 'voice';
+  rawTranscript: string | null; // original speech-to-text, kept after edits
   // Local 'YYYY-MM-DD': the day the entry is *about*, not necessarily when it
   // was written. Defaults to today server-side when omitted on create.
   entryDate: string;
@@ -277,6 +279,10 @@ export type JournalEntryInput = {
   body: string;
   tags?: string | null;
   entryDate?: string;
+  // Capture-only, like Task's — dictating then editing is normal, but how it
+  // was captured is a fact about the past, so PATCH cannot change it.
+  source?: 'text' | 'voice';
+  rawTranscript?: string | null;
 };
 
 // null/absent = leave unchanged. A blank body is a 400, not a delete — journal
