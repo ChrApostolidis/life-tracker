@@ -126,12 +126,6 @@ export default function HomePage() {
             <span>
               Day {dayOfYearNum} · {yearPct}% of {now.getFullYear()}
             </span>
-            {unscheduled.length > 0 && (
-              <span className={styles.inboxChip}>
-                <FontAwesomeIcon icon={faInbox} className={styles.inboxIcon} />
-                {unscheduled.length} in inbox
-              </span>
-            )}
           </div>
        </div>
         <h1 className={styles.greeting}>
