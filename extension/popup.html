@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <form id="capture">
+      <p class="eyebrow">Quick capture</p>
+      <input
+        id="title"
+        type="text"
+        placeholder="What's on your mind?"
+        autocomplete="off"
+        maxlength="200"
+      />
+      <div class="footer">
+        <span id="status" role="status"></span>
+        <kbd>enter</kbd>
+      </div>
+    </form>
+    <script src="popup.js"></script>
+  </body>
+</html>
