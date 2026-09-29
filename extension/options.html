@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Life Tracker Quick Capture</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body class="options">
+    <form id="settings">
+      <p class="eyebrow">Backend</p>
+      <input
+        id="api-url"
+        type="text"
+        placeholder="http://your-host:8080"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <p class="hint">
+        Where your Life Tracker API is reachable from this machine, for example
+        http://localhost:8080. Any path is dropped. Saving asks Chrome for
+        permission to call that host.
+      </p>
+      <button type="submit">Save</button>
+      <div class="footer"><span id="status" role="status"></span></div>
+    </form>
+    <script src="options.js"></script>
+  </body>
+</html>
