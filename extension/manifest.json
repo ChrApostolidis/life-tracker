@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Life Tracker Quick Capture",
+  "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkgzx7sk8HfVPni9cU2IhpKUBUzQzhbqAwKcH9h4VVprHtV91McAmsL2jeIFIbnjsWLLfTIVkU4A1vKuTyZKAxQdZadNYk7KRkCsmMpAf0feMLM8YbLeQUKUZVZ+KwluGVpg9zrq6aZK8cuF61nqPDVZgqT5aQbr5SEmKLE8Fe50bIxXoXMn2wrHZ++lrlpC7Gqf9yu1x2vYTsKmcoc2eIXhPhPSRGRyT4q+xfuxKAbdK1yAbYr0iuH6LIkBdBFRpsHf922VTQOJ09f6CIfKGkYylp6u8j+E7BtF+raZiOg5X+L26WcWmi4XovRlRUmFtdXQsJMy3pgc6FTUtDKDlQwIDAQAB",
+  "description": "Capture a task into Life Tracker from anywhere in Chrome.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Life Tracker quick capture"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "permissions": ["storage"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Open quick capture"
+    }
+  }
+}
