@@ -1,0 +1,235 @@
+/* Tokens copied from the web app's globals.css, plus the pieces every screen
+   shares. Keep them in sync: the extension should not look like a different
+   product. */
+:root {
+  --bg: #0e0f12;
+  --bg-elevated: #16181b;
+  --bg-hover: #1e2128;
+  --border: #262932;
+  --text-primary: #ecedee;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --accent: #6b9bd1;
+  --accent-soft: rgba(107, 155, 209, 0.13);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --mic-active: #f87171;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a {
+  color: var(--accent);
+}
+
+svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+kbd {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.status {
+  margin: 0;
+  min-height: 18px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.status.ok {
+  color: var(--success);
+}
+
+.status.error {
+  color: var(--mic-active);
+}
+
+.status.warning {
+  color: var(--warning);
+}
+
+.text-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+}
+
+.text-input::placeholder {
+  color: var(--text-muted);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.1);
+}
+
+.text-input:read-only {
+  color: var(--text-secondary);
+}
+
+/* Round mic button; fills red while recording, like the web capture modal. */
+.mic {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+
+.mic:hover {
+  background: var(--bg-hover);
+}
+
+.mic[aria-pressed="true"] {
+  background: var(--mic-active);
+  border-color: var(--mic-active);
+  color: var(--bg);
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.18);
+}
+
+.chip {
+  padding: 3px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.chip:hover {
+  background: var(--bg-hover);
+}
+
+.chip[aria-checked="true"],
+.chip[aria-selected="true"] {
+  background: var(--accent-soft);
+  border-color: rgba(107, 155, 209, 0.45);
+  color: var(--accent);
+}
+
+.lang-chip {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.primary {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.link-button {
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+}
+
+.icon-button:hover {
+  background: var(--bg-hover);
+}
+
+/* Skeleton wave, copied from the web app's skeleton.module.css. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-hover);
+  flex-shrink: 0;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(236, 237, 238, 0.06) 50%, transparent 100%);
+  animation: skeletonWave 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonWave {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+  .skeleton {
+    opacity: 0.7;
+  }
+}
