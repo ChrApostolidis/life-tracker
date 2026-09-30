@@ -41,6 +41,14 @@ export const api = {
   // Never contains recurring tasks: a missed occurrence simply recurs.
   listOverdue: () => request('/api/tasks/overdue'),
   createTask: (input) => request('/api/tasks', { method: 'POST', body: input }),
+  // null means "leave unchanged", so moving a task back to the Inbox is unschedule().
+  // On a recurring task the id is the series template, so this edits every day.
+  updateTask: (id, patch) => request(`/api/tasks/${id}`, { method: 'PATCH', body: patch }),
+  unschedule: (id) => request(`/api/tasks/${id}/unschedule`, { method: 'POST' }),
+
+  // Half-open ['YYYY-MM-DD', 'YYYY-MM-DD'), newest first.
+  listJournalEntries: (from, to) =>
+    request(`/api/journal-entries?from=${from}&to=${to}`),
   createJournalEntry: (input) => request('/api/journal-entries', { method: 'POST', body: input }),
 
   // Occurrences of a recurring series share the template's id, so they are

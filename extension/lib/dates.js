@@ -34,3 +34,50 @@ export function formatAgeShort(iso) {
   if (weeks < 5) return `${weeks}w`;
   return `${Math.floor(days / 30)}mo`;
 }
+
+// Date → 'YYYY-MM-DD' in local time.
+export function toDateInput(d) {
+  return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
+}
+
+// 'YYYY-MM-DD' + 'HH:MM' → ISO instant, or null if either half is malformed.
+export function combineDateTime(date, time) {
+  const d = new Date(`${date}T${time}:00`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+export function splitDateTime(iso) {
+  return { date: toDateInput(new Date(iso)), time: formatTimeLabel(iso) };
+}
+
+// The day an Inbox / Today / Tomorrow chip stands for; null means the Inbox.
+export function dayForChoice(choice) {
+  const today = startOfDay(new Date());
+  if (choice === 'today') return today;
+  if (choice === 'tomorrow') return addDays(today, 1);
+  return null;
+}
+
+// Which chip describes an existing date: inbox, today, tomorrow, or date for any other day.
+export function choiceForDate(iso) {
+  if (!iso) return 'inbox';
+  const today = startOfDay(new Date());
+  if (isSameDay(iso, today)) return 'today';
+  if (isSameDay(iso, addDays(today, 1))) return 'tomorrow';
+  return 'date';
+}
+
+// "Today at 14:00", "Tomorrow", "Thu, Oct 2 at 09:00". Midnight means no time was
+// given: the model has no all-day flag, so a dated capture is stored at 00:00.
+export function describeWhen(iso) {
+  if (!iso) return 'Inbox, no date';
+  const choice = choiceForDate(iso);
+  const day =
+    choice === 'today'
+      ? 'Today'
+      : choice === 'tomorrow'
+        ? 'Tomorrow'
+        : new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const time = formatTimeLabel(iso);
+  return time === '00:00' ? day : `${day} at ${time}`;
+}
