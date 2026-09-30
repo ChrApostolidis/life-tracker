@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Life Tracker</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <header class="panel-header">
+      <div>
+        <p class="eyebrow">Today</p>
+        <h1 id="date" class="date"></h1>
+      </div>
+      <button type="button" id="refresh" class="icon-button" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v4h-4" />
+        </svg>
+      </button>
+    </header>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="chip" role="tab" id="tab-today" data-tab="today" aria-controls="view-today" aria-selected="true">Tasks</button>
+      <button type="button" class="chip" role="tab" id="tab-journal" data-tab="journal" aria-controls="view-journal" aria-selected="false">Journal</button>
+    </div>
+    <p id="queue" class="status warning queue" hidden></p>
+
+    <section id="view-today" role="tabpanel" aria-labelledby="tab-today">
+      <form id="add-task" class="composer">
+        <label for="add-title" class="composer-label">Add a task</label>
+        <div class="field">
+          <input id="add-title" class="text-input" type="text" placeholder="What needs doing?" autocomplete="off" maxlength="200" />
+          <button type="button" id="add-mic" class="mic" aria-label="Dictate a task" aria-pressed="false" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+          </button>
+        </div>
+        <div class="composer-row">
+          <div id="add-when" class="chips" role="radiogroup" aria-label="When">
+            <button type="button" class="chip" role="radio" data-choice="inbox" aria-checked="true">Inbox</button>
+            <button type="button" class="chip" role="radio" data-choice="today" aria-checked="false">Today</button>
+            <button type="button" class="chip" role="radio" data-choice="tomorrow" aria-checked="false">Tomorrow</button>
+          </div>
+          <button type="button" id="add-lang" class="chip lang-chip" aria-label="Voice language" hidden>EL</button>
+          <button type="submit" class="primary">Add</button>
+        </div>
+        <p id="add-status" class="status" role="status"></p>
+      </form>
+
+      <div class="list-header">
+        <p class="eyebrow">Your day</p>
+        <p id="today-meta" class="meta"></p>
+      </div>
+      <p class="hint">Tick the circle when a task is done. Click a task to read it in full or edit it.</p>
+      <div id="today-list" aria-live="polite"></div>
+      <p id="today-status" class="status" role="status"></p>
+    </section>
+
+    <section id="view-journal" role="tabpanel" aria-labelledby="tab-journal" hidden>
+      <form id="journal" class="composer">
+        <label for="journal-body" class="composer-label">New entry for today</label>
+        <input id="journal-title" class="text-input" type="text" placeholder="Title, optional" autocomplete="off" />
+        <textarea id="journal-body" class="text-input" rows="8" placeholder="How is today going?"></textarea>
+        <p class="hint">Add #tags anywhere to tag the entry. Your draft is kept if you close the panel.</p>
+        <div class="composer-row">
+          <button type="button" id="journal-mic" class="mic" aria-label="Dictate" aria-pressed="false" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="3" width="6" height="11" rx="3" />
+              <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+            </svg>
+          </button>
+          <button type="button" id="journal-lang" class="chip lang-chip" aria-label="Voice language" hidden>EL</button>
+          <span class="spacer"></span>
+          <kbd>ctrl enter</kbd>
+          <button type="submit" id="journal-save" class="primary">Save entry</button>
+        </div>
+        <p id="journal-status" class="status" role="status"></p>
+      </form>
+
+      <div class="list-header">
+        <p class="eyebrow">Written today</p>
+        <p id="journal-meta" class="meta"></p>
+      </div>
+      <div id="journal-list" aria-live="polite"></div>
+    </section>
+    <script type="module" src="sidepanel.js"></script>
+  </body>
+</html>

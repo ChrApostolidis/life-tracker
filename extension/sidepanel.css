@@ -1,0 +1,394 @@
+body {
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.date {
+  margin: 2px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.queue {
+  margin: -8px 0 12px;
+}
+
+.hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.field,
+.composer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.composer-row .chips {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+/* ── Composers: the add-task box and the journal entry box ─────────────── */
+
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.composer-label {
+  font-weight: 600;
+}
+
+/* Inputs sit on --bg so they stand out from the elevated card. */
+.composer .text-input,
+.edit-form .text-input {
+  background: var(--bg);
+}
+
+.composer .hint {
+  margin: 0;
+}
+
+.composer .status:empty {
+  display: none;
+}
+
+textarea.text-input {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+#journal-body {
+  min-height: 140px;
+}
+
+/* ── Task list ─────────────────────────────────────────────────────────── */
+
+.list-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.section + .section {
+  margin-top: 20px;
+}
+
+.section-label {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.section-label.overdue {
+  color: var(--warning);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  border-bottom: 1px solid var(--border);
+}
+
+.row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 6px 4px;
+}
+
+.time {
+  width: 40px;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.title-button {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+  background: none;
+  border: none;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title-button:hover {
+  color: var(--accent);
+}
+
+/* Expanded: the whole title, however long, wrapped over as many lines as it needs. */
+.row.expanded .title-button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.row.done .title-button {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 999px;
+  color: transparent;
+}
+
+.check:hover {
+  border-color: var(--accent);
+}
+
+.check svg {
+  width: 12px;
+  height: 12px;
+}
+
+.row.done .check {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--bg);
+}
+
+.check:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Preview: indented to line up with the title (20px check + 40px time + two 10px gaps). */
+.details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 4px 10px 84px;
+}
+
+.facts {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.heard {
+  margin: 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* ── Edit form ─────────────────────────────────────────────────────────── */
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.field-label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.edit-when {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.edit-when-row {
+  display: flex;
+  gap: 8px;
+}
+
+.text-input.compact {
+  width: auto;
+  padding: 6px 8px;
+}
+
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ghost {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+}
+
+.ghost:hover {
+  background: var(--bg-hover);
+}
+
+/* ── Journal list ──────────────────────────────────────────────────────── */
+
+.entry {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.entry:hover {
+  border-color: rgba(107, 155, 209, 0.45);
+}
+
+.entry-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.entry-title {
+  font-weight: 600;
+}
+
+.entry-time {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Collapsed entries show three lines; a click opens the whole thing. */
+.entry-body {
+  display: -webkit-box;
+  margin-top: 4px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  color: var(--text-secondary);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.entry.expanded .entry-body {
+  display: block;
+}
+
+.entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.tag {
+  padding: 1px 8px;
+  background: var(--accent-soft);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+.empty {
+  padding: 16px 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.retry {
+  margin-left: 6px;
+}
+
+/* ── Skeletons share the real geometry so nothing shifts when data lands ── */
+
+.skeleton-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+}
+
+.skeleton-time {
+  width: 40px;
+  height: 10px;
+  border-radius: 4px;
+}
+
+.skeleton-title {
+  flex: 1;
+  max-width: 70%;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.skeleton-line {
+  display: block;
+  height: 12px;
+  margin-top: 8px;
+  border-radius: 4px;
+}
