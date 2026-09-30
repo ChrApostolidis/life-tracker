@@ -1,19 +1,31 @@
 {
   "manifest_version": 3,
-  "name": "Life Tracker Quick Capture",
-  "version": "0.1.0",
+  "name": "Life Tracker",
+  "version": "0.2.0",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkgzx7sk8HfVPni9cU2IhpKUBUzQzhbqAwKcH9h4VVprHtV91McAmsL2jeIFIbnjsWLLfTIVkU4A1vKuTyZKAxQdZadNYk7KRkCsmMpAf0feMLM8YbLeQUKUZVZ+KwluGVpg9zrq6aZK8cuF61nqPDVZgqT5aQbr5SEmKLE8Fe50bIxXoXMn2wrHZ++lrlpC7Gqf9yu1x2vYTsKmcoc2eIXhPhPSRGRyT4q+xfuxKAbdK1yAbYr0iuH6LIkBdBFRpsHf922VTQOJ09f6CIfKGkYylp6u8j+E7BtF+raZiOg5X+L26WcWmi4XovRlRUmFtdXQsJMy3pgc6FTUtDKDlQwIDAQAB",
-  "description": "Capture a task into Life Tracker from anywhere in Chrome.",
+  "description": "Capture tasks and journal entries, and tick off today's tasks, without opening Life Tracker.",
+  "minimum_chrome_version": "116",
   "action": {
     "default_popup": "popup.html",
     "default_title": "Life Tracker quick capture"
   },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "options_page": "options.html",
-  "permissions": ["storage"],
-  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "permissions": [
+    "storage",
+    "alarms",
+    "sidePanel"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {
@@ -21,6 +33,13 @@
         "mac": "Command+Shift+K"
       },
       "description": "Open quick capture"
+    },
+    "open-side-panel": {
+      "suggested_key": {
+        "default": "Alt+Shift+T",
+        "mac": "Alt+Shift+T"
+      },
+      "description": "Open today's tasks and the journal"
     }
   }
 }
