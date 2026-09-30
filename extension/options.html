@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Life Tracker Quick Capture</title>
-    <link rel="stylesheet" href="popup.css" />
+    <title>Life Tracker extension options</title>
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="options.css" />
   </head>
-  <body class="options">
-    <form id="settings">
+  <body>
+    <form id="settings" class="block">
       <p class="eyebrow">Backend</p>
       <input
         id="api-url"
+        class="text-input"
         type="text"
         placeholder="http://your-host:8080"
         autocomplete="off"
@@ -20,9 +22,24 @@
         http://localhost:8080. Any path is dropped. Saving asks Chrome for
         permission to call that host.
       </p>
-      <button type="submit">Save</button>
-      <div class="footer"><span id="status" role="status"></span></div>
+      <div class="actions">
+        <button type="submit" class="primary">Save</button>
+        <p id="status" class="status" role="status"></p>
+      </div>
     </form>
-    <script src="options.js"></script>
+
+    <section class="block">
+      <p class="eyebrow">Microphone</p>
+      <p class="hint">
+        Chrome cannot show the microphone prompt inside the popup or the side
+        panel, so voice capture needs permission granted once here. Only the
+        transcribed text is ever saved, never audio.
+      </p>
+      <div class="actions">
+        <button type="button" id="mic-grant" class="primary">Allow microphone</button>
+        <p id="mic-status" class="status" role="status"></p>
+      </div>
+    </section>
+    <script type="module" src="options.js"></script>
   </body>
 </html>
