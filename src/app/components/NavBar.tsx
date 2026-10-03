@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { api, LOGIN_PATH } from "@/lib/api";
 import { navItems, isActivePath } from "./nav-items";
 import TodayRing from "./TodayRing";
 import styles from "./navBar.module.css";
@@ -18,6 +19,18 @@ type Props = {
 export default function NavBar({ id, open = false, onClose }: Props) {
   const pathname = usePathname();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const [logoutFailed, setLogoutFailed] = useState(false);
+
+  // Leaves only once the server has ended the session; a failed request would
+  // otherwise land on /login while still signed in and bounce straight back.
+  async function logOut() {
+    try {
+      await api.logout();
+      window.location.assign(LOGIN_PATH);
+    } catch {
+      setLogoutFailed(true);
+    }
+  }
 
   // When the drawer opens on mobile, move focus into it.
   useEffect(() => {
@@ -76,6 +89,14 @@ export default function NavBar({ id, open = false, onClose }: Props) {
       </div>
       <div className={styles.navFooter}>
         <TodayRing />
+        <button type="button" className={`${styles.navItem} ${styles.logoutButton}`} onClick={logOut}>
+          <span className={styles.navIcon} aria-hidden="true">
+            <FontAwesomeIcon icon={faRightFromBracket} />
+          </span>
+          <span className={styles.navLabel} role={logoutFailed ? "alert" : undefined}>
+            {logoutFailed ? "Could not log out. Try again" : "Log out"}
+          </span>
+        </button>
       </div>
     </nav>
   );
