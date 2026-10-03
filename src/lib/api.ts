@@ -37,10 +37,13 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 // callers branch on `status`, not on text.
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message?: string) {
+  // Seconds the server asked us to wait (Retry-After), e.g. after too many login attempts.
+  retryAfter: number | null;
+  constructor(status: number, message?: string, retryAfter: number | null = null) {
     super(message ?? `Request failed (HTTP ${status})`);
     this.name = 'ApiError';
     this.status = status;
+    this.retryAfter = retryAfter;
   }
 }
 
@@ -53,17 +56,41 @@ export function describeError(e: unknown, fallback: string): string {
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
+  // The auth calls handle their own 401: a wrong password is one, and
+  // redirecting would only reload the login page being typed into.
+  redirectOn401?: boolean;
 };
 
-async function request<T>(path: string, { method = 'GET', body }: RequestOptions = {}): Promise<T> {
-  const init: RequestInit = { method };
+export const LOGIN_PATH = '/login';
+
+// A full page load rather than a client-side push, so every provider starts
+// clean after logging in. Remembers the page you were on.
+export function goToLogin() {
+  // No browser location during a server render, or in the mobile repo's copy of this file.
+  if (typeof window === 'undefined' || !window.location) return;
+  if (window.location.pathname === LOGIN_PATH) return;
+  const next = window.location.pathname + window.location.search;
+  window.location.assign(`${LOGIN_PATH}?next=${encodeURIComponent(next)}`);
+}
+
+async function request<T>(
+  path: string,
+  { method = 'GET', body, redirectOn401 = true }: RequestOptions = {},
+): Promise<T> {
+  // The session is an httpOnly cookie for the API's host, so these cross-origin
+  // calls have to opt in to sending it.
+  const init: RequestInit = { method, credentials: 'include' };
   if (body !== undefined) {
     init.body = JSON.stringify(body);
     init.headers = { 'Content-Type': 'application/json' };
   }
 
   const res = await fetch(`${BASE_URL}${path}`, init);
-  if (!res.ok) throw new ApiError(res.status);
+  if (!res.ok) {
+    if (res.status === 401 && redirectOn401) goToLogin();
+    const retryAfter = Number(res.headers.get('Retry-After'));
+    throw new ApiError(res.status, undefined, retryAfter > 0 ? retryAfter : null);
+  }
   if (res.status === 204) return undefined as T; // no content
   return (await res.json()) as T;
 }
@@ -215,4 +242,17 @@ export const api = {
 
   unwatchEpisode: (id: string, season: number, episode: number) =>
     request<void>(`/api/watch-items/${id}/episodes/${season}/${episode}`, { method: 'DELETE' }),
+
+  // Single-user login, see AUTH_PLAN.md. A web login answers 204 and sets an
+  // httpOnly cookie, so the session token never reaches JavaScript at all.
+  login: (password: string) =>
+    request<void>('/api/auth/login', {
+      method: 'POST',
+      body: { password, client: 'web' },
+      redirectOn401: false,
+    }),
+  logout: () => request<void>('/api/auth/logout', { method: 'POST', redirectOn401: false }),
+  // Resolves when signed in, and also whenever the backend is not enforcing
+  // auth, so the web app follows the backend's switch. ApiError(401) otherwise.
+  me: () => request<void>('/api/auth/me', { redirectOn401: false }),
 };
