@@ -4,6 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import "react-date-picker/dist/DatePicker.css";
 import "./globals.css";
 import AppShell from "./components/AppShell";
+import AuthGate from "./components/AuthGate";
 import { AppProvider } from "@/lib/app-context";
 import { HabitsProvider } from "@/lib/habits-context";
 import CaptureModal from "./components/CaptureModal";
@@ -36,13 +37,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AppProvider>
-          <HabitsProvider>
-            <AppShell>{children}</AppShell>
-            <Fab />
-            <CaptureModal />
-          </HabitsProvider>
-        </AppProvider>
+        {/* children appears twice on purpose: bare for /login, inside the app
+            everywhere else. AuthGate renders exactly one of the two. */}
+        <AuthGate page={children}>
+          <AppProvider>
+            <HabitsProvider>
+              <AppShell>{children}</AppShell>
+              <Fab />
+              <CaptureModal />
+            </HabitsProvider>
+          </AppProvider>
+        </AuthGate>
       </body>
     </html>
   );
