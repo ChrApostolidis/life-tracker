@@ -9,6 +9,11 @@ import type {
   JournalEntryPatch,
   EpisodeWatch,
   EpisodeWatchResponse,
+  Exercise,
+  ExerciseInput,
+  ExercisePatch,
+  ExerciseSession,
+  GymSettings,
   Habit,
   HabitCheck,
   HabitInput,
@@ -20,12 +25,22 @@ import type {
   Note,
   NoteInput,
   NotePatch,
+  ProgressionSuggestion,
   Task,
   TaskInput,
   TaskPatch,
+  TrainingStyle,
   WatchItem,
   WatchItemInput,
   WatchItemPatch,
+  Workout,
+  WorkoutDetail,
+  WorkoutInput,
+  WorkoutPatch,
+  WorkoutSet,
+  WorkoutSetInput,
+  WorkoutSetPatch,
+  WorkoutSummary,
 } from './types';
 
 // Base URL for the Spring backend. Override with NEXT_PUBLIC_API_URL.
@@ -242,6 +257,69 @@ export const api = {
 
   unwatchEpisode: (id: string, season: number, episode: number) =>
     request<void>(`/api/watch-items/${id}/episodes/${season}/${episode}`, { method: 'DELETE' }),
+
+  // Gym — see GYM_TRACKER_PLAN.md. Weights are integer grams.
+  // Exercises: all of them including archived, name ascending.
+  listExercises: () => request<Exercise[]>('/api/exercises'),
+
+  createExercise: (input: ExerciseInput) =>
+    request<Exercise>('/api/exercises', { method: 'POST', body: input }),
+
+  updateExercise: (id: string, patch: ExercisePatch) =>
+    request<Exercise>(`/api/exercises/${id}`, { method: 'PATCH', body: patch }),
+
+  // Drops a pinned rep range so the exercise follows the training style again.
+  clearExerciseRepRange: (id: string) =>
+    request<Exercise>(`/api/exercises/${id}/clear-rep-range`, { method: 'POST' }),
+
+  // trainingStyle null = never chosen; the page asks on first visit.
+  getGymSettings: () => request<GymSettings>('/api/gym-settings'),
+
+  updateGymSettings: (trainingStyle: TrainingStyle) =>
+    request<GymSettings>('/api/gym-settings', { method: 'PATCH', body: { trainingStyle } }),
+
+  archiveExercise: (id: string) => request<void>(`/api/exercises/${id}/archive`, { method: 'POST' }),
+  unarchiveExercise: (id: string) => request<void>(`/api/exercises/${id}/unarchive`, { method: 'POST' }),
+
+  // Past sessions of one exercise, newest first.
+  exerciseHistory: (id: string, limit = 10) =>
+    request<ExerciseSession[]>(`/api/exercises/${id}/history?limit=${limit}`),
+
+  // Pass the workout in progress so it never suggests against itself.
+  exerciseSuggestion: (id: string, excludeWorkoutId?: string) =>
+    request<ProgressionSuggestion>(
+      `/api/exercises/${id}/suggestion` +
+        (excludeWorkoutId ? `?excludeWorkoutId=${encodeURIComponent(excludeWorkoutId)}` : ''),
+    ),
+
+  // Workouts: newest first, each with a digest of its sets for history cards.
+  // No range in v1 — single user, tiny data.
+  listWorkouts: () => request<WorkoutSummary[]>('/api/workouts'),
+
+  getWorkout: (id: string) => request<WorkoutDetail>(`/api/workouts/${id}`),
+
+  // Starts one now. performedOn defaults to today server-side.
+  startWorkout: (input: WorkoutInput = {}) =>
+    request<Workout>('/api/workouts', { method: 'POST', body: input }),
+
+  updateWorkout: (id: string, patch: WorkoutPatch) =>
+    request<Workout>(`/api/workouts/${id}`, { method: 'PATCH', body: patch }),
+
+  // Idempotent: a second call keeps the first finish time.
+  finishWorkout: (id: string) => request<Workout>(`/api/workouts/${id}/finish`, { method: 'POST' }),
+
+  removeWorkout: (id: string) => request<void>(`/api/workouts/${id}`, { method: 'DELETE' }),
+  restoreWorkout: (id: string) => request<void>(`/api/workouts/${id}/restore`, { method: 'POST' }),
+
+  // Each set is saved the moment it's logged, so a dead tab loses nothing.
+  addWorkoutSet: (workoutId: string, input: WorkoutSetInput) =>
+    request<WorkoutSet>(`/api/workouts/${workoutId}/sets`, { method: 'POST', body: input }),
+
+  updateWorkoutSet: (id: string, patch: WorkoutSetPatch) =>
+    request<WorkoutSet>(`/api/workout-sets/${id}`, { method: 'PATCH', body: patch }),
+
+  removeWorkoutSet: (id: string) => request<void>(`/api/workout-sets/${id}`, { method: 'DELETE' }),
+  restoreWorkoutSet: (id: string) => request<void>(`/api/workout-sets/${id}/restore`, { method: 'POST' }),
 
   // Single-user login, see AUTH_PLAN.md. A web login answers 204 and sets an
   // httpOnly cookie, so the session token never reaches JavaScript at all.

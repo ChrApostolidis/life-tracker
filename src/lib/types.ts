@@ -314,3 +314,113 @@ export function serializeTags(tags: string[]): string | null {
   }
   return kept.length > 0 ? kept.join(', ') : null;
 }
+
+// ── Gym ──────────────────────────────────────────────────────────────────
+
+// Weights are integer GRAMS end to end (62500 = 62.5 kg), the same reason
+// money uses integer cents. Dumbbell weights are per hand.
+
+export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core';
+export type Equipment = 'barbell' | 'dumbbell' | 'machine' | 'cable' | 'bodyweight';
+
+export type ExerciseKind = 'compound' | 'isolation';
+
+// Picked once on first visit to /gym; sets the default rep ranges, mostly for
+// compound lifts. Labels: Strength, Strength + size, Hypertrophy.
+export type TrainingStyle = 'strength' | 'balanced' | 'hypertrophy';
+
+export type GymSettings = {
+  id: string; // always 'default' — a single row
+  trainingStyle: TrainingStyle | null; // null = not chosen yet: ask
+  updatedAt: string | null;
+};
+
+export type Exercise = {
+  id: string; // seeded ones are 'seed-…'
+  name: string;
+  muscleGroup: MuscleGroup;
+  equipment: Equipment;
+  kind: ExerciseKind;
+  // The rep range in effect (override, else the training style's), always
+  // filled by the backend. Every set at repMax means add weight.
+  repMin: number;
+  repMax: number;
+  // Non-null = pinned by hand and ignoring the style. Both or neither.
+  repMinOverride: number | null;
+  repMaxOverride: number | null;
+  weightStepGrams: number; // 0 = bodyweight, progresses by reps instead
+  archivedAt: string | null; // archived, never deleted, so history keeps its name
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ExerciseInput = {
+  name: string;
+  muscleGroup: MuscleGroup;
+  equipment: Equipment;
+  kind: ExerciseKind;
+  // Optional override, both or neither; absent = follow the training style.
+  repMin?: number;
+  repMax?: number;
+  weightStepGrams?: number; // absent = the default for the equipment
+};
+
+// null/absent = leave unchanged. Sending either rep bound pins the range;
+// use api.clearExerciseRepRange to follow the style again.
+export type ExercisePatch = Partial<ExerciseInput>;
+
+export type Workout = {
+  id: string;
+  performedOn: string; // local 'YYYY-MM-DD'
+  startedAt: string;
+  finishedAt: string | null; // null = in progress, or Finish never tapped
+  notes: string | null;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkoutInput = { performedOn?: string; notes?: string | null };
+export type WorkoutPatch = Partial<Pick<Workout, 'performedOn' | 'notes'>>;
+
+export type WorkoutSet = {
+  id: string;
+  workoutId: string;
+  exerciseId: string;
+  position: number; // order within the workout, assigned server-side
+  weightGrams: number;
+  reps: number;
+  warmup: boolean; // never counts toward the suggestion
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkoutSetInput = { exerciseId: string; weightGrams: number; reps: number; warmup?: boolean };
+export type WorkoutSetPatch = Partial<Pick<WorkoutSet, 'weightGrams' | 'reps' | 'warmup'>>;
+
+export type WorkoutDetail = { workout: Workout; sets: WorkoutSet[] };
+
+// A history card's worth: exerciseIds distinct in the order first logged;
+// workingSetCount and volumeGrams (Σ weight × reps) skip warm-ups.
+export type WorkoutSummary = {
+  workout: Workout;
+  exerciseIds: string[];
+  workingSetCount: number;
+  volumeGrams: number;
+};
+
+// Every set of one exercise within one workout, warm-ups included.
+export type ExerciseSession = { workoutId: string; performedOn: string; sets: WorkoutSet[] };
+
+// What to try next time, from the backend's double-progression rules. The
+// "why" line is phrased here from basedOn — the backend sends no UI copy.
+export type ProgressionSuggestion = {
+  // 'extend' = top of the range reached, but the next step is too big a jump
+  // yet, so targetReps goes past repMax at the same weight.
+  action: 'start' | 'increase' | 'repeat' | 'deload' | 'extend';
+  weightGrams: number | null; // null only for 'start'
+  targetReps: number;
+  setCount: number | null; // working sets at the working weight last time
+  basedOn: ExerciseSession | null;
+};
