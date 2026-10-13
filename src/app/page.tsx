@@ -27,6 +27,7 @@ import { formatTimeLabel, startOfDay, addDays, toDateInput } from '@/lib/date';
 import { greetingWord, pickFlavorLine, pickQuote } from '@/lib/quotes';
 import type { Book } from '@/lib/types';
 import Skeleton, { SkeletonBlock } from './components/Skeleton';
+import SleepCard from './components/SleepCard';
 import styles from './home.module.css';
 
 const HOME_HABITS_LIMIT = 6;
@@ -153,6 +154,8 @@ export default function HomePage() {
           )}
         </div>
       </Link>
+
+      <SleepCard className={styles.sleep} />
 
       {habitsLoading && habits.length === 0 ? (
         <SkeletonBlock className={styles.habitsCard} label="Loading habits">
