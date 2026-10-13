@@ -1,0 +1,118 @@
+.field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel,
+.groupLabel {
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.trigger {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.trigger:hover {
+  border-color: var(--text-muted);
+}
+
+.trigger:focus-visible,
+.triggerOpen,
+.triggerOpen:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(107, 155, 209, 0.10);
+}
+
+/* ── Panel: floats over the page, spanning its positioned parent's width ── */
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  /* Floats over other content, so it takes the modal's elevation. */
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+}
+
+.hourGrid,
+.minuteGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.minuteGrid {
+  margin-bottom: 4px;
+}
+
+.option,
+.optionSelected {
+  height: 32px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.option {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+}
+
+.option:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.optionSelected {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.option:focus-visible,
+.optionSelected:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+@media (max-width: 767px) {
+  .trigger {
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .option,
+  .optionSelected {
+    height: 44px;
+    font-size: 14px;
+  }
+}
