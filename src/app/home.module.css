@@ -1,8 +1,45 @@
+/* Home alone breaks the app's 720px column: it grows with the screen up to a
+   cap, so wide monitors get a dashboard rather than a stretched strip. Cards
+   are placed by grid area, so the same areas cover skeletons and real cards. */
 .page {
-  max-width: 720px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 48px 32px 80px;
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'hero'
+    'today'
+    'sleep'
+    'habits'
+    'level'
+    'quote'
+    'books'
+    'tiles';
+  gap: 16px;
+}
+
+/* Left column is what you act on (today, habits), right is sleep and the
+   ambient cards. The 1fr row soaks up any height difference between the two
+   columns, so it lands on the quote instead of stretching the level strip. */
+@media (min-width: 1024px) {
+  .page {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-rows: auto auto auto auto 1fr auto auto;
+    grid-template-areas:
+      'hero   hero'
+      'today  sleep'
+      'habits sleep'
+      'habits level'
+      'habits quote'
+      'books  books'
+      'tiles  tiles';
+  }
+}
+
+.sleep {
+  grid-area: sleep;
 }
 
 /* Radial accent glow behind the hero — matches Today's header treatment */
@@ -19,9 +56,10 @@
 
 /* ── Hero ── */
 .hero {
+  grid-area: hero;
   position: relative;
   z-index: 1;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .headerTop {
@@ -57,13 +95,13 @@
 
 /* ── Quote card ── */
 .quoteCard {
+  grid-area: quote;
   position: relative;
   z-index: 1;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
-  margin-bottom: 24px;
 }
 
 .quoteText {
@@ -83,6 +121,7 @@
 
 /* ── Today snapshot ── */
 .snapshotCard {
+  grid-area: today;
   display: block;
   position: relative;
   z-index: 1;
@@ -90,7 +129,6 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px 20px;
-  margin-bottom: 16px;
   text-decoration: none;
   transition: background-color 120ms ease, border-color 120ms ease;
 }
@@ -147,6 +185,7 @@
 
 /* ── Level & streak strip ── */
 .levelStrip {
+  grid-area: level;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -156,7 +195,6 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px 20px;
-  margin-bottom: 24px;
   text-decoration: none;
   transition: background-color 120ms ease, border-color 120ms ease;
 }
@@ -241,6 +279,7 @@
 
 /* ── Books showcase ── */
 .booksCard {
+  grid-area: books;
   display: block;
   position: relative;
   z-index: 1;
@@ -248,7 +287,6 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px 20px;
-  margin-bottom: 24px;
   text-decoration: none;
   transition: background-color 120ms ease, border-color 120ms ease;
 }
@@ -370,16 +408,17 @@ div.booksStripCover {
    buttons, and <button> inside <a> is invalid HTML with conflicting click
    targets. Navigation lives in the header's own small link instead.) ── */
 .habitsCard {
+  grid-area: habits;
   position: relative;
   z-index: 1;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px 20px;
-  margin-bottom: 24px;
 }
 
 .habitsCardEmpty {
+  grid-area: habits;
   display: block;
   position: relative;
   z-index: 1;
@@ -387,11 +426,20 @@ div.booksStripCover {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px 20px;
-  margin-bottom: 24px;
   color: var(--text-muted);
   font-size: 13px;
   text-decoration: none;
   transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+/* A one-line link shouldn't stretch down two rows of the desktop grid. */
+.habitsCardEmpty {
+  align-self: start;
+}
+
+/* A one-line link shouldn't stretch down two rows of the desktop grid. */
+.habitsCardEmpty {
+  align-self: start;
 }
 
 .habitsCardEmpty:hover {
@@ -494,12 +542,12 @@ div.booksStripCover {
 
 /* ── Quick menu tiles ── */
 .tiles {
+  grid-area: tiles;
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin-bottom: 24px;
 }
 
 .tile {
@@ -536,6 +584,18 @@ div.booksStripCover {
 
 .tile:hover .tileIcon {
   color: var(--accent);
+}
+
+@media (min-width: 1024px) {
+  .tiles {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tiles {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 
 /* ── Footer ── */

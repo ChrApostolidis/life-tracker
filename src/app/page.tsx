@@ -134,11 +134,6 @@ export default function HomePage() {
         <p className={styles.flavor}>{flavorLine}</p>
       </header>
 
-      <div className={styles.quoteCard}>
-        <p className={styles.quoteText}>&ldquo;{quote.text}&rdquo;</p>
-        <div className={styles.quoteAuthor}>— {quote.author}</div>
-      </div>
-
       <Link href="/today" className={styles.snapshotCard}>
         <div className={styles.snapshotHeader}>
           <span className={styles.snapshotLabel}>Today</span>
@@ -265,6 +260,11 @@ export default function HomePage() {
           )}
         </Link>
       )}
+
+      <div className={styles.quoteCard}>
+        <p className={styles.quoteText}>&ldquo;{quote.text}&rdquo;</p>
+        <div className={styles.quoteAuthor}>— {quote.author}</div>
+      </div>
 
       {books === null ? (
         <SkeletonBlock className={styles.booksCard} label="Loading books">
