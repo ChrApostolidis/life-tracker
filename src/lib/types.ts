@@ -179,6 +179,21 @@ export type DayNote = {
 
 export type DayNoteInput = { body: string; rating?: number | null };
 
+// One night of sleep. sleepDate is the local 'YYYY-MM-DD' of the morning you
+// woke (Sun 23:40 → Mon 07:00 is Monday's), unique per day like DayNote.
+// bedAt/wokeAt are ISO instants; hours slept are derived, never stored.
+export type SleepLog = {
+  id: string;
+  sleepDate: string;
+  bedAt: string;
+  wokeAt: string;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SleepLogInput = { bedAt: string; wokeAt: string };
+
 export type MediaType = 'movie' | 'series';
 // 'watchlist' -> 'watched'. A series can also sit at 'watching' in between; a
 // movie can't — there's no part-way state worth recording for one, and the

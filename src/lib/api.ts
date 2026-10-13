@@ -26,6 +26,8 @@ import type {
   NoteInput,
   NotePatch,
   ProgressionSuggestion,
+  SleepLog,
+  SleepLogInput,
   Task,
   TaskInput,
   TaskPatch,
@@ -222,6 +224,16 @@ export const api = {
     request<DayNote>(`/api/day-notes/${date}`, { method: 'POST', body: input }),
 
   removeDayNote: (date: string) => request<void>(`/api/day-notes/${date}`, { method: 'DELETE' }),
+
+  // Sleep: one night per 'YYYY-MM-DD' (the morning you woke), half-open [from, to).
+  listSleepLogs: (from: string, to: string) =>
+    request<SleepLog[]>(`/api/sleep-logs?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
+  // Upsert. 400 when wokeAt isn't after bedAt or the night is over 24 hours.
+  saveSleepLog: (date: string, input: SleepLogInput) =>
+    request<SleepLog>(`/api/sleep-logs/${date}`, { method: 'POST', body: input }),
+
+  removeSleepLog: (date: string) => request<void>(`/api/sleep-logs/${date}`, { method: 'DELETE' }),
 
   // Long-form journal entries. Unlike day notes these have ids and allow many
   // per day, so they are addressed by id, not by date.
