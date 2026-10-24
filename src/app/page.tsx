@@ -10,6 +10,7 @@ import {
   faCalendarWeek,
   faCheck,
   faDiceD20,
+  faDumbbell,
   faFilm,
   faFire,
   faInbox,
@@ -377,6 +378,10 @@ export default function HomePage() {
         <Link href="/habits" className={styles.tile}>
           <FontAwesomeIcon icon={faListCheck} className={styles.tileIcon} />
           <span>Habits</span>
+        </Link>
+        <Link href="/gym" className={styles.tile}>
+          <FontAwesomeIcon icon={faDumbbell} className={styles.tileIcon} />
+          <span>Gym</span>
         </Link>
         <Link href="/watchlist" className={styles.tile}>
           <FontAwesomeIcon icon={faFilm} className={styles.tileIcon} />
