@@ -1,0 +1,221 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back svg {
+  width: 10px;
+  height: 10px;
+}
+
+.back:hover {
+  color: var(--text-secondary);
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.4px;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── Exercises ── */
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.addExercise {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.addExercise svg {
+  width: 12px;
+  height: 12px;
+}
+
+.addExercise:hover,
+.addExercise:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Rest timer: pinned above the bottom of the scroll area while it runs ── */
+.rest {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 8px 8px 8px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+}
+
+.restLabel {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.restClock {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+.restDismiss {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.restDismiss:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+/* ── Footer actions ── */
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.finishBtn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.finishBtn:hover {
+  opacity: 0.9;
+}
+
+.finishBtn:disabled,
+.deleteBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.deleteBtn {
+  margin-left: auto;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.deleteBtn:hover {
+  color: var(--text-primary);
+}
+
+.deleteBtnArmed {
+  color: var(--mic-active);
+  border-color: var(--mic-active);
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 80px;
+  }
+
+  .footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .finishBtn,
+  .deleteBtn {
+    width: 100%;
+    margin-left: 0;
+  }
+}
