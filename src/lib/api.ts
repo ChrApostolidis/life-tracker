@@ -317,8 +317,13 @@ export const api = {
   updateWorkout: (id: string, patch: WorkoutPatch) =>
     request<Workout>(`/api/workouts/${id}`, { method: 'PATCH', body: patch }),
 
-  // Idempotent: a second call keeps the first finish time.
-  finishWorkout: (id: string) => request<Workout>(`/api/workouts/${id}/finish`, { method: 'POST' }),
+  // Idempotent: a second call keeps the first finish time. finishedAt is for
+  // an offline client syncing later; absent = the server stamps now.
+  finishWorkout: (id: string, finishedAt?: string) =>
+    request<Workout>(`/api/workouts/${id}/finish`, {
+      method: 'POST',
+      body: finishedAt ? { finishedAt } : undefined,
+    }),
 
   removeWorkout: (id: string) => request<void>(`/api/workouts/${id}`, { method: 'DELETE' }),
   restoreWorkout: (id: string) => request<void>(`/api/workouts/${id}/restore`, { method: 'POST' }),

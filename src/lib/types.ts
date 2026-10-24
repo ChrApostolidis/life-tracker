@@ -395,7 +395,9 @@ export type Workout = {
   updatedAt: string;
 };
 
-export type WorkoutInput = { performedOn?: string; notes?: string | null };
+// id and startedAt are for a client logging offline (the mobile app): a
+// client-minted id makes a retried create return the first row, not a duplicate.
+export type WorkoutInput = { performedOn?: string; notes?: string | null; id?: string; startedAt?: string };
 export type WorkoutPatch = Partial<Pick<Workout, 'performedOn' | 'notes'>>;
 
 export type WorkoutSet = {
@@ -411,7 +413,7 @@ export type WorkoutSet = {
   updatedAt: string;
 };
 
-export type WorkoutSetInput = { exerciseId: string; weightGrams: number; reps: number; warmup?: boolean };
+export type WorkoutSetInput = { exerciseId: string; weightGrams: number; reps: number; warmup?: boolean; id?: string };
 export type WorkoutSetPatch = Partial<Pick<WorkoutSet, 'weightGrams' | 'reps' | 'warmup'>>;
 
 export type WorkoutDetail = { workout: Workout; sets: WorkoutSet[] };
