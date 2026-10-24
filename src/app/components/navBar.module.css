@@ -45,6 +45,96 @@
   overflow: hidden;
 }
 
+/* ── Drill-down: the top level and one group panel sit side by side in a strip
+   twice the sidebar's width; opening a group slides the strip left. ── */
+.panels {
+  display: flex;
+  width: 200%;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panelsDrilled {
+  transform: translateX(-50%);
+}
+
+.panel {
+  width: 50%;
+  flex-shrink: 0;
+  transition: opacity 200ms ease;
+}
+
+/* The panel sliding away fades as it goes, so the two never read as one list. */
+.panel[inert] {
+  opacity: 0;
+}
+
+.groupBtn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.groupChevron {
+  display: flex;
+  color: var(--text-muted);
+}
+
+.groupChevron svg {
+  width: 10px;
+  height: 10px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.backBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.backIcon {
+  display: flex;
+}
+
+.backIcon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.panelTitle {
+  padding: 16px 12px 8px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panels,
+  .panel {
+    transition: none;
+  }
+}
+
 .navList {
   display: flex;
   flex-direction: column;
@@ -122,23 +212,6 @@
   border-top: 1px solid var(--border);
 }
 
-/* A button styled as a nav link: it performs an action rather than going to a page. */
-.logoutButton {
-  width: 100%;
-  min-height: 44px;
-  margin-top: 8px;
-  background: none;
-  border: none;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.logoutButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* ── Mobile: off-canvas drawer ── */
 @media (max-width: 767px) {
   .navBar {
@@ -160,14 +233,16 @@
     visibility: visible;
   }
 
-  .navItem {
+  .navItem,
+  .backBtn {
     min-height: 44px;
   }
 
+  /* No margin-left: auto here: AccountMenu pushes right and this follows it.
+     Two auto margins would split the space and strand the menu mid-header. */
   .closeBtn {
     display: grid;
     place-items: center;
-    margin-left: auto;
     width: 40px;
     height: 40px;
     border: none;
