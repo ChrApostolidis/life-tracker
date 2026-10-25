@@ -93,8 +93,7 @@
 }
 
 .input:focus,
-.textarea:focus,
-.chipField:focus-within {
+.textarea:focus {
   outline: none;
   border-color: var(--accent);
 }
@@ -104,8 +103,7 @@
 }
 
 .input::placeholder,
-.textarea::placeholder,
-.chipInput::placeholder {
+.textarea::placeholder {
   color: var(--text-muted);
 }
 
@@ -153,61 +151,6 @@
   margin: 0;
   font-size: 12px;
   color: var(--warning);
-}
-
-/* ── Tech stack — the Journal composer's tag field ── */
-.chipField {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 44px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 8px;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 4px 2px 10px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 12px;
-  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
-}
-
-.chipRemove {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--accent);
-  padding: 0;
-  cursor: pointer;
-}
-
-.chipRemove svg {
-  width: 10px;
-  height: 10px;
-}
-
-.chipInput {
-  flex: 1;
-  min-width: 120px;
-  min-height: 30px;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 14px;
-  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
-  outline: none;
 }
 
 /* ── Timeline ── */
@@ -355,8 +298,7 @@
 
   /* 16px keeps iOS from zooming the viewport on focus. */
   .input,
-  .textarea,
-  .chipInput {
+  .textarea {
     font-size: 16px;
   }
 

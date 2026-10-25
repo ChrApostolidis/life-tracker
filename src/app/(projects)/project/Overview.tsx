@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, type KeyboardEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowUpRightFromSquare, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 import { useProjects } from '@/lib/projects-context';
 import { useDictation } from '@/lib/use-dictation';
 import {
+  MAX_PROJECT_TAGS,
   MAX_TECH_STACK,
   STAGES,
   STAGE_LABELS,
@@ -24,6 +25,7 @@ import {
   type ProjectStatus,
 } from '@/lib/types';
 import DictationControls from '../../components/DictationControls';
+import ChipInput from '../ChipInput';
 import { formatDay, useTwoTapDelete } from './project-ui';
 import styles from './overview.module.css';
 
@@ -58,7 +60,7 @@ export default function Overview({
   });
   const [urlErrors, setUrlErrors] = useState<Partial<Record<UrlField, string>>>({});
   const [stack, setStack] = useState(() => parseTags(project.techStack));
-  const [stackDraft, setStackDraft] = useState('');
+  const [tags, setTags] = useState(() => parseTags(project.tags));
   const deleteTap = useTwoTapDelete();
   const [deleting, setDeleting] = useState(false);
 
@@ -101,21 +103,10 @@ export default function Overview({
     if (serialized !== (project.techStack ?? '')) save({ techStack: serialized });
   }
 
-  function commitStack() {
-    const tech = stackDraft.trim();
-    // At the cap the text stays put rather than vanishing unsaved.
-    if (!tech || stack.length >= MAX_TECH_STACK) return;
-    saveStack(parseTags(serializeTags([...stack, tech], MAX_TECH_STACK)));
-    setStackDraft('');
-  }
-
-  function handleStackKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      commitStack();
-    } else if (e.key === 'Backspace' && !stackDraft && stack.length > 0) {
-      saveStack(stack.slice(0, -1));
-    }
+  function saveTags(next: string[]) {
+    setTags(next);
+    const serialized = serializeTags(next, MAX_PROJECT_TAGS) ?? '';
+    if (serialized !== (project.tags ?? '')) save({ tags: serialized });
   }
 
   function changeStatus(status: ProjectStatus) {
@@ -234,32 +225,26 @@ export default function Overview({
         <label className={styles.label} htmlFor="overview-stack">
           Tech stack
         </label>
-        <div className={styles.chipField}>
-          {stack.map((tech) => (
-            <span key={tech} className={styles.chip}>
-              {tech}
-              <button
-                type="button"
-                className={styles.chipRemove}
-                onClick={() => saveStack(stack.filter((t) => t !== tech))}
-                aria-label={`Remove ${tech}`}
-              >
-                <FontAwesomeIcon icon={faXmark} />
-              </button>
-            </span>
-          ))}
-          <input
-            id="overview-stack"
-            className={styles.chipInput}
-            placeholder={
-              stack.length === 0 ? 'Add a technology' : stack.length >= MAX_TECH_STACK ? `${MAX_TECH_STACK} max` : ''
-            }
-            value={stackDraft}
-            onChange={(e) => setStackDraft(e.target.value)}
-            onKeyDown={handleStackKeyDown}
-            onBlur={commitStack}
-          />
-        </div>
+        <ChipInput
+          id="overview-stack"
+          values={stack}
+          onChange={saveStack}
+          max={MAX_TECH_STACK}
+          placeholder="Add a technology"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <label className={styles.label} htmlFor="overview-tags">
+          Tags
+        </label>
+        <ChipInput
+          id="overview-tags"
+          values={tags}
+          onChange={saveTags}
+          max={MAX_PROJECT_TAGS}
+          placeholder="Add a tag, like work or weekend"
+        />
       </section>
 
       <section className={styles.section}>
