@@ -455,6 +455,7 @@ export type Project = {
   repoUrl: string | null;
   liveUrl: string | null;
   techStack: string | null; // comma-separated; parseTags / serializeTags
+  tags: string | null; // same format; free-form labels the pools filter by
   startedOn: string | null;
   finishedOn: string | null;
   deletedAt: string | null;
@@ -463,10 +464,16 @@ export type Project = {
 };
 
 // description lets an idea be talked through at capture time, not only later in Overview.
-export type ProjectInput = { name: string; status: ProjectStatus; pitch?: string | null; description?: string | null };
+export type ProjectInput = {
+  name: string;
+  status: ProjectStatus;
+  pitch?: string | null;
+  description?: string | null;
+  tags?: string | null;
+};
 
 export type ProjectPatch = Partial<
-  Pick<Project, 'name' | 'pitch' | 'description' | 'status' | 'repoUrl' | 'liveUrl' | 'techStack' | 'startedOn' | 'finishedOn'>
+  Pick<Project, 'name' | 'pitch' | 'description' | 'status' | 'repoUrl' | 'liveUrl' | 'techStack' | 'tags' | 'startedOn' | 'finishedOn'>
 >;
 
 // The board's four fixed columns. Named stage, not column — a reserved word in SQL.

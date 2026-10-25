@@ -59,6 +59,9 @@ export const PRIORITY_LABELS: Record<ProjectPriority, string> = {
 
 export const MAX_TECH_STACK = 8;
 
+// Same cap as journal tags, so the filter row on a pool stays short.
+export const MAX_PROJECT_TAGS = 5;
+
 // 'YYYY-MM-DD' strings compare correctly as text, so no Date parsing is needed.
 export function isOverdue(item: Pick<ProjectItem, 'dueOn' | 'stage'>, today: Date): boolean {
   return item.dueOn !== null && item.stage !== 'done' && item.dueOn < toDateInput(today);

@@ -75,6 +75,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         repoUrl: null,
         liveUrl: null,
         techStack: null,
+        tags: input.tags ?? null,
         startedOn: null,
         finishedOn: null,
         deletedAt: null,
