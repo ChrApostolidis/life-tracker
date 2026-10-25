@@ -13,6 +13,7 @@ This is the **frontend** (Next.js). The API and persistence layer lives in a sep
 - [Why I Built It](#why-i-built-it)
 - [Design principles](#design-principles)
 - [Features](#features)
+- [Chrome extension](#chrome-extension)
 - [Demos](#demos)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
@@ -85,10 +86,31 @@ The RPG layer (`/stats`, with levels, XP, streaks, attributes, achievements) exi
 - **Book library**: search via Open Library (no API key), a wishlist → owned → reading → finished pipeline with auto-stamped start/finish dates
 - **Movie & series tracker**: search via TMDB (key stays server-side, behind Next.js Route Handlers), a watchlist → watched pipeline with genre labels, plus per-episode tracking for series that auto-completes a show on its final episode
 - **Habits**: binary daily checklists, checkable from Home, Today, or a dedicated `/habits` page, with a rolling streak strip
+- **Gym tracker**: log workouts set by set and get a suggested weight for every exercise, from double-progression rules (add weight once the top of the rep range is reached, hold off on big dumbbell jumps until the reps earn them, deload after three misses). Rep ranges follow a training style you pick once (Strength, Strength + size, Hypertrophy), with isolation work kept in higher reps
+- **Projects**: a project manager for side projects, grouped as Ideas, Ongoing and Finished. Each project has a Kanban board (To do / In progress / Done / Blocked) with drag and drop that works by mouse, touch and keyboard, an Overview of its links, tech stack and progress, and a dated Updates log. Ideas can be talked through by voice (English or Greek) when you capture them and again later in the description
+- **Sleep log**: a Home card that asks when you went to bed and woke up, then shows the night's hours and a 7-night strip
 - **Day journal**: one free-form entry per day with a 1 to 5 star rating, saved on blur and folded into the reflection streak
 - **Journal**: one browsable timeline over both the daily logs and longer tagged entries, with filter chips, search and a month jumper, so nothing written ever gets lost
 - **Stats / RPG engine** (`src/lib/game.ts`): a pure, stateless replay of your history into XP, levels, per-domain streaks, a 4-axis attribute radar, and achievements. Nothing is stored server-side for this; it's recomputed from the same rows every other screen already shows
 - **Skeleton loading**: every page draws placeholder blocks shaped like the content it's fetching, so nothing jumps when the data lands
+
+---
+
+## Chrome extension
+
+`extension/` holds a small Manifest V3 extension for working with the tracker from anywhere in the browser, without opening the app first. It has two surfaces:
+
+- **Popup** (`Ctrl+Shift+K`): one input for a quick task, saved to the Inbox, Today or Tomorrow, with the same Greek/English dictation as the web app. It stays open after a save, so several things can be captured in a row.
+- **Side panel** (`Alt+Shift+T`): a Tasks tab with today's overdue, unscheduled and scheduled tasks, which you can tick off, expand, rename or reschedule in place, and a Journal tab for writing today's entries, with `#hashtags` turned into tags.
+
+Captures made while the server is unreachable are queued and retried every minute, and the toolbar badge counts what's overdue or still open today.
+
+It is loaded unpacked (`chrome://extensions`, Developer mode, Load unpacked, pick the `extension/` folder) rather than installed from the Chrome Web Store. No build step, no dependencies, no bundler.
+
+Two decisions worth knowing:
+
+- **Every network call happens in the service worker**, where a host permission lifts Chrome's own CORS check. The backend still checks the `Origin` header itself, though, so the extension's origin is on the API's allow-list. Its ID is pinned by a public key in the manifest, so that entry keeps matching wherever the folder lives on disk.
+- **The backend address is entered on the options page**, stored in the browser, and never committed. Saving it asks Chrome for permission to call that one host, so the extension holds no blanket access to every site you visit.
 
 ---
 
@@ -130,4 +152,5 @@ src/
   app/components/ shared UI (modals, nav, DayView, etc.)
   lib/            api.ts (REST client), types.ts, date.ts, game.ts (RPG engine),
                   and one *-context.tsx per feature domain (optimistic state + rollback)
+extension/        Manifest V3 Chrome extension (quick capture + side panel), loaded unpacked
 ```
