@@ -1,0 +1,137 @@
+/* Scrolls inside the modal's fixed height; the padding/margin pair keeps focus rings unclipped. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px;
+  margin: -8px;
+}
+
+.name,
+.input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* 16px keeps iOS from zooming the viewport on focus. */
+.input {
+  font-size: 16px;
+}
+
+.name:focus,
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(107, 155, 209, 0.1);
+}
+
+.name::placeholder,
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Takes the room the other fields leave, so the modal's fixed height is spent on the thought. */
+.notes {
+  flex: 1;
+  min-height: 120px;
+  resize: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.voiceError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--mic-active);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 20px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.saveBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(107, 155, 209, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ghostBtn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.ghostBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.ghostBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 767px) {
+  .saveBtn,
+  .ghostBtn {
+    min-height: 44px;
+  }
+}
