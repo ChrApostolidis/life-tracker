@@ -1,0 +1,282 @@
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+/* ── Board: four columns, equal height so every column is a full-length drop target ── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 320px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 4px 4px;
+}
+
+.columnLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.addBtn {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.addBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.addBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Card ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  text-align: left;
+  cursor: grab;
+  /* Lets TouchSensor's press delay decide between a drag and a scroll. */
+  touch-action: manipulation;
+  transition: border-color 120ms ease;
+}
+
+.card:hover {
+  border-color: var(--text-muted);
+}
+
+.card:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.card:disabled {
+  cursor: default;
+}
+
+/* The slot the dragged card will land in; the overlay carries the card itself. */
+.cardPlaceholder {
+  opacity: 0.4;
+}
+
+.cardOverlay {
+  border-color: var(--accent);
+  cursor: grabbing;
+}
+
+.cardTitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.noteIcon {
+  width: 12px;
+  height: 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.priorityUrgent {
+  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.priorityNormal {
+  color: var(--text-secondary);
+}
+
+.priorityLow {
+  color: var(--text-muted);
+}
+
+.chipOverdue {
+  color: var(--warning);
+}
+
+.cardDone .cardTitle {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.cardDone .chip {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+/* ── Adding ── */
+.addInput {
+  width: 100%;
+  padding: 11px 12px;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.addInput::placeholder {
+  color: var(--text-muted);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.emptyAdd {
+  min-height: 44px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.emptyAdd:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .addBtn,
+  .emptyAdd {
+    transition: none;
+  }
+}
+
+/* ── Mobile: a horizontal strip, one column per snap ── */
+@media (max-width: 767px) {
+  .board {
+    display: flex;
+    gap: 12px;
+    /* Bleed to the screen edges past the page's 16px gutter. */
+    margin: 0 -16px;
+    padding: 0 16px 8px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Snapping would fight dnd-kit's auto-scroll toward the next column. */
+  .boardDragging {
+    scroll-snap-type: none;
+  }
+
+  .column {
+    flex: 0 0 85vw;
+    scroll-snap-align: start;
+  }
+
+  .addBtn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .addInput {
+    font-size: 16px;
+  }
+}
