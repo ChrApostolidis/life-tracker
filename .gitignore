@@ -45,3 +45,6 @@ design_handoff_life_tracker
 # markdown (keep README tracked)
 *.md
 !README.md
+
+# n8n workflow exports (kept local)
+n8n/
