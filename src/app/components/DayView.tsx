@@ -2,9 +2,10 @@
 
 import { useState, useEffect, type MouseEvent } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faTrash, faPlus, faRepeat } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTrash, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { useApp } from '@/lib/app-context';
 import { useHabits } from '@/lib/habits-context';
+import AddButton from './AddButton';
 import DayJournal from './DayJournal';
 import Skeleton, { SkeletonBlock } from './Skeleton';
 import { isSameDay, formatDate, formatTimeLabel, formatAgeShort, startOfDay, addDays, toDateInput } from '@/lib/date';
@@ -185,10 +186,7 @@ export default function DayView({ date }: { date: Date }) {
             {totalTasks} tasks · <span className={styles.doneCount}>{doneCount} done</span>
           </div>
         </div>
-        <button className={styles.addBtn} onClick={() => openCapture(date)} type="button">
-          <FontAwesomeIcon icon={faPlus} />
-          <span className={styles.addBtnLabel}>Add task</span>
-        </button>
+        <AddButton label="Add task" onClick={() => openCapture(date)} />
       </header>
 
       {error && <div className={styles.empty}>{error}</div>}
