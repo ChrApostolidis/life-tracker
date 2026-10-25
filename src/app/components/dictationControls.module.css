@@ -1,0 +1,62 @@
+.micBtn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.micBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.micBtn:hover:enabled {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.micBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Recording: red fill + 6px accent ring, matching the capture modal. */
+.micBtnActive,
+.micBtnActive:hover:enabled {
+  background: var(--mic-active);
+  border-color: var(--mic-active);
+  color: var(--bg);
+  outline: 6px solid var(--accent-soft);
+}
+
+.langChip {
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.langChip:hover:enabled {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.langChip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
