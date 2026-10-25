@@ -26,6 +26,17 @@ import type {
   NoteInput,
   NotePatch,
   ProgressionSuggestion,
+  Project,
+  ProjectInput,
+  ProjectItem,
+  ProjectItemInput,
+  ProjectItemMove,
+  ProjectItemPatch,
+  ProjectPatch,
+  ProjectSummary,
+  ProjectUpdate,
+  ProjectUpdateInput,
+  ProjectUpdatePatch,
   SleepLog,
   SleepLogInput,
   Task,
@@ -337,6 +348,65 @@ export const api = {
 
   removeWorkoutSet: (id: string) => request<void>(`/api/workout-sets/${id}`, { method: 'DELETE' }),
   restoreWorkoutSet: (id: string) => request<void>(`/api/workout-sets/${id}/restore`, { method: 'POST' }),
+
+  // Projects — see PROJECTS_PLAN.md. Summaries sorted by lastActivityAt desc,
+  // with per-stage item counts. No range — single user, tiny data.
+  listProjects: () => request<ProjectSummary[]>('/api/projects'),
+
+  getProject: (id: string) => request<Project>(`/api/projects/${id}`),
+
+  // Created straight into ongoing / finished, it auto-stamps startedOn / finishedOn.
+  createProject: (input: ProjectInput) =>
+    request<Project>('/api/projects', { method: 'POST', body: input }),
+
+  // 400 for a repo / live URL that isn't http(s).
+  updateProject: (id: string, patch: ProjectPatch) =>
+    request<Project>(`/api/projects/${id}`, { method: 'PATCH', body: patch }),
+
+  // Items and updates are left alone; they're unreachable through a deleted project.
+  removeProject: (id: string) => request<void>(`/api/projects/${id}`, { method: 'DELETE' }),
+  restoreProject: (id: string) => request<void>(`/api/projects/${id}/restore`, { method: 'POST' }),
+
+  // Board items, by stage then position asc.
+  listProjectItems: (projectId: string) =>
+    request<ProjectItem[]>(`/api/projects/${projectId}/items`),
+
+  // Appended to the end of its stage. stage defaults to todo, priority to normal.
+  createProjectItem: (projectId: string, input: ProjectItemInput) =>
+    request<ProjectItem>(`/api/projects/${projectId}/items`, { method: 'POST', body: input }),
+
+  // Not stage or position — those change only through moveProjectItem.
+  updateProjectItem: (id: string, patch: ProjectItemPatch) =>
+    request<ProjectItem>(`/api/project-items/${id}`, { method: 'PATCH', body: patch }),
+
+  // PATCH cannot clear a field (null = unchanged), so dropping a due date has its own verb.
+  clearProjectItemDue: (id: string) =>
+    request<ProjectItem>(`/api/project-items/${id}/clear-due`, { method: 'POST' }),
+
+  // index is among the target stage's other items. Answers with every item of
+  // the project, in order, so the client can replace its optimistic guess.
+  moveProjectItem: (id: string, move: ProjectItemMove) =>
+    request<ProjectItem[]>(`/api/project-items/${id}/move`, { method: 'POST', body: move }),
+
+  removeProjectItem: (id: string) => request<void>(`/api/project-items/${id}`, { method: 'DELETE' }),
+  restoreProjectItem: (id: string) =>
+    request<void>(`/api/project-items/${id}/restore`, { method: 'POST' }),
+
+  // Progress log, entryDate desc then createdAt desc.
+  listProjectUpdates: (projectId: string) =>
+    request<ProjectUpdate[]>(`/api/projects/${projectId}/updates`),
+
+  // Blank body is a 400. entryDate defaults to today server-side.
+  createProjectUpdate: (projectId: string, input: ProjectUpdateInput) =>
+    request<ProjectUpdate>(`/api/projects/${projectId}/updates`, { method: 'POST', body: input }),
+
+  updateProjectUpdate: (id: string, patch: ProjectUpdatePatch) =>
+    request<ProjectUpdate>(`/api/project-updates/${id}`, { method: 'PATCH', body: patch }),
+
+  removeProjectUpdate: (id: string) =>
+    request<void>(`/api/project-updates/${id}`, { method: 'DELETE' }),
+  restoreProjectUpdate: (id: string) =>
+    request<void>(`/api/project-updates/${id}/restore`, { method: 'POST' }),
 
   // Single-user login, see AUTH_PLAN.md. A web login answers 204 and sets an
   // httpOnly cookie, so the session token never reaches JavaScript at all.

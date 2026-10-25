@@ -315,7 +315,7 @@ export function parseTags(tags: string | null): string[] {
 
 // Trims, drops blanks, de-duplicates case-insensitively, and caps the count.
 // Returns null rather than '' so an empty tag list never round-trips as a tag.
-export function serializeTags(tags: string[]): string | null {
+export function serializeTags(tags: string[], max = MAX_TAGS): string | null {
   const seen = new Set<string>();
   const kept: string[] = [];
   for (const raw of tags) {
@@ -325,7 +325,7 @@ export function serializeTags(tags: string[]): string | null {
     if (seen.has(key)) continue;
     seen.add(key);
     kept.push(tag);
-    if (kept.length === MAX_TAGS) break;
+    if (kept.length === max) break;
   }
   return kept.length > 0 ? kept.join(', ') : null;
 }
@@ -441,3 +441,93 @@ export type ProgressionSuggestion = {
   setCount: number | null; // working sets at the working weight last time
   basedOn: ExerciseSession | null;
 };
+
+// Projects (see PROJECTS_PLAN.md). A project moves idea → ongoing → finished;
+// startedOn/finishedOn are local 'YYYY-MM-DD' days, auto-stamped like Book's.
+export type ProjectStatus = 'idea' | 'ongoing' | 'finished';
+
+export type Project = {
+  id: string;
+  name: string;
+  pitch: string | null;
+  description: string | null;
+  status: ProjectStatus;
+  repoUrl: string | null;
+  liveUrl: string | null;
+  techStack: string | null; // comma-separated; parseTags / serializeTags
+  startedOn: string | null;
+  finishedOn: string | null;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// description lets an idea be talked through at capture time, not only later in Overview.
+export type ProjectInput = { name: string; status: ProjectStatus; pitch?: string | null; description?: string | null };
+
+export type ProjectPatch = Partial<
+  Pick<Project, 'name' | 'pitch' | 'description' | 'status' | 'repoUrl' | 'liveUrl' | 'techStack' | 'startedOn' | 'finishedOn'>
+>;
+
+// The board's four fixed columns. Named stage, not column — a reserved word in SQL.
+export type ProjectStage = 'todo' | 'doing' | 'done' | 'blocked';
+
+export type ProjectPriority = 'low' | 'normal' | 'urgent';
+
+// A pool card's worth: counts carry all four stages, zeros included.
+// lastActivityAt is the latest of the project, its items and its updates.
+export type ProjectSummary = {
+  project: Project;
+  counts: Record<ProjectStage, number>;
+  lastActivityAt: string;
+};
+
+export type ProjectItem = {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string | null;
+  stage: ProjectStage;
+  priority: ProjectPriority;
+  dueOn: string | null; // local 'YYYY-MM-DD'
+  position: number; // order within the stage, gapped; only the server assigns it
+  completedAt: string | null; // stamped on entering 'done', cleared on leaving
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ProjectItemInput = {
+  title: string;
+  description?: string | null;
+  stage?: ProjectStage;
+  priority?: ProjectPriority;
+  dueOn?: string | null;
+};
+
+// Stage and position change only through the move endpoint; clearing dueOn has its own verb.
+export type ProjectItemPatch = Partial<Pick<ProjectItem, 'title' | 'description' | 'priority' | 'dueOn'>>;
+
+// index is among the target stage's other items; the server answers with the whole board.
+export type ProjectItemMove = { stage: ProjectStage; index: number };
+
+export type ProjectUpdate = {
+  id: string;
+  projectId: string;
+  body: string;
+  entryDate: string; // local 'YYYY-MM-DD'
+  source: 'text' | 'voice';
+  rawTranscript: string | null;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ProjectUpdateInput = {
+  body: string;
+  entryDate?: string;
+  source?: 'text' | 'voice'; // create-only, like JournalEntry's
+  rawTranscript?: string | null;
+};
+
+export type ProjectUpdatePatch = Partial<Pick<ProjectUpdate, 'body' | 'entryDate'>>;
