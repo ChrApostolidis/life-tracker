@@ -1,16 +1,26 @@
 import Link from 'next/link';
 import { formatRelativeTime } from '@/lib/date';
 import { progressOf } from '@/lib/projects';
-import type { ProjectSummary } from '@/lib/types';
+import { parseTags, type ProjectSummary } from '@/lib/types';
 import styles from './pool.module.css';
 
 export default function ProjectCard({ summary }: { summary: ProjectSummary }) {
   const { project, counts, lastActivityAt } = summary;
   const progress = progressOf(counts);
+  const tags = parseTags(project.tags);
   const body = (
     <>
       <div className={styles.cardName}>{project.name}</div>
       {project.pitch && <div className={styles.cardPitch}>{project.pitch}</div>}
+      {tags.length > 0 && (
+        <div className={styles.cardTags}>
+          {tags.map((tag) => (
+            <span key={tag} className={styles.cardTag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {progress.total > 0 && (
         <div className={styles.progress}>

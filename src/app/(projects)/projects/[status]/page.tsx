@@ -1,12 +1,12 @@
 'use client';
 
-import { use, useRef, useState, type KeyboardEvent } from 'react';
+import { use, useMemo, useState } from 'react';
 import { useProjects } from '@/lib/projects-context';
-import { useDictation } from '@/lib/use-dictation';
 import { POOL_LABELS, statusFromSlug } from '@/lib/projects';
-import type { ProjectStatus } from '@/lib/types';
-import DictationControls from '../../../components/DictationControls';
+import { parseTags, type ProjectStatus, type ProjectSummary } from '@/lib/types';
+import AddButton from '../../../components/AddButton';
 import Skeleton, { SkeletonBlock } from '../../../components/Skeleton';
+import NewProjectModal from './NewProjectModal';
 import ProjectCard from './ProjectCard';
 import styles from './pool.module.css';
 
@@ -17,6 +17,26 @@ const EMPTY_COPY: Record<ProjectStatus, string> = {
   ongoing: 'Nothing in progress. Pick something from your ideas.',
   finished: 'Nothing shipped yet.',
 };
+
+type TagCount = { key: string; label: string; count: number };
+
+// Grouped case-insensitively, so "Work" on one card and "work" on another are one filter.
+function countTags(pool: ProjectSummary[]): TagCount[] {
+  const byKey = new Map<string, TagCount>();
+  for (const { project } of pool) {
+    for (const tag of parseTags(project.tags)) {
+      const key = tag.toLowerCase();
+      const entry = byKey.get(key) ?? { key, label: tag, count: 0 };
+      entry.count += 1;
+      byKey.set(key, entry);
+    }
+  }
+  return [...byKey.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}
+
+function hasTag(summary: ProjectSummary, key: string): boolean {
+  return parseTags(summary.project.tags).some((tag) => tag.toLowerCase() === key);
+}
 
 // Same .grid/.card geometry as the real cards, so nothing shifts on load.
 function PoolSkeleton() {
@@ -36,155 +56,74 @@ function PoolSkeleton() {
   );
 }
 
-function Composer({ status }: { status: ProjectStatus }) {
-  const { addProject } = useProjects();
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [pitch, setPitch] = useState('');
-  const [notes, setNotes] = useState('');
-  const nameRef = useRef<HTMLInputElement>(null);
-  // An idea is often easier said than typed; the notes become the project's description.
-  const dictation = useDictation(notes, setNotes);
-
-  function reset() {
-    setName('');
-    setPitch('');
-    setNotes('');
-    dictation.clear();
-  }
-
-  function close() {
-    if (dictation.listening) return;
-    reset();
-    setOpen(false);
-  }
-
-  // Stays open with focus back on the name, so several ideas go in a row.
-  function save() {
-    const trimmed = name.trim();
-    // Saving mid-dictation would drop the tail, which only lands once recording stops.
-    if (!trimmed || dictation.listening) return;
-    const typed = { pitch, notes };
-    reset();
-    nameRef.current?.focus();
-    void addProject({ name: trimmed, status, pitch: typed.pitch.trim() || null, description: typed.notes.trim() || null }).then(
-      (created) => {
-        // A failed save hands the text back, unless something new was typed meanwhile.
-        if (created) return;
-        setName((current) => current || trimmed);
-        setPitch((current) => current || typed.pitch);
-        setNotes((current) => current || typed.notes);
-      },
-    );
-  }
-
-  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      save();
-    } else if (e.key === 'Escape') {
-      close();
-    }
-  }
-
-  // Enter is a new line here; Esc doesn't throw away a long thought.
-  function handleNotesKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      save();
-    }
-  }
-
-  return (
-    <div className={styles.composer}>
-      {!open ? (
-        <button type="button" className={styles.composerTrigger} onClick={() => setOpen(true)}>
-          {status === 'idea' ? 'New idea' : 'New project'}
-        </button>
-      ) : (
-        <>
-          <input
-            ref={nameRef}
-            className={styles.composerInput}
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-          />
-          <input
-            className={styles.composerInput}
-            placeholder="One-line pitch (optional)"
-            value={pitch}
-            onChange={(e) => setPitch(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <textarea
-            className={`${styles.composerInput} ${styles.composerNotes}`}
-            placeholder={dictation.listening ? 'Listening…' : 'Talk it through (optional)'}
-            aria-label="Notes"
-            value={dictation.liveText}
-            onChange={(e) => setNotes(e.target.value)}
-            onKeyDown={handleNotesKeyDown}
-            readOnly={dictation.listening}
-            rows={3}
-          />
-          {dictation.error && <p className={styles.voiceError}>{dictation.error}</p>}
-          <div className={styles.composerActions}>
-            <DictationControls dictation={dictation} hint="Talk the idea through" />
-            <div className={styles.spacer} />
-            <button type="button" className={styles.ghostBtn} onClick={close} disabled={dictation.listening}>
-              Cancel
-            </button>
-            <button
-              type="button"
-              className={styles.saveBtn}
-              onClick={save}
-              disabled={!name.trim() || dictation.listening}
-            >
-              Save
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
 function Pool({ status }: { status: ProjectStatus }) {
   const { summaries, loading, error } = useProjects();
-  const pool = summaries.filter((s) => s.project.status === status);
+  const [creating, setCreating] = useState(false);
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const pool = useMemo(() => summaries.filter((s) => s.project.status === status), [summaries, status]);
+  const tags = useMemo(() => countTags(pool), [pool]);
+  // A filter whose last project was retagged or moved away falls back to All.
+  const activeTag = tags.some((t) => t.key === tagFilter) ? tagFilter : null;
+  const shown = activeTag ? pool.filter((s) => hasTag(s, activeTag)) : pool;
   const coldLoad = loading && summaries.length === 0 && !error;
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.eyebrow}>Projects</div>
-        <h1 className={styles.title}>{POOL_LABELS[status]}</h1>
-        <div className={styles.meta}>
-          {coldLoad ? (
-            <Skeleton height={14} width={80} radius={4} />
-          ) : (
-            `${pool.length} ${pool.length === 1 ? 'project' : 'projects'}`
-          )}
+        <div className={styles.headerText}>
+          <div className={styles.eyebrow}>Projects</div>
+          <h1 className={styles.title}>{POOL_LABELS[status]}</h1>
+          <div className={styles.meta}>
+            {coldLoad ? (
+              <Skeleton height={14} width={80} radius={4} />
+            ) : (
+              `${pool.length} ${pool.length === 1 ? 'project' : 'projects'}`
+            )}
+          </div>
         </div>
+        <AddButton label={status === 'idea' ? 'New idea' : 'New project'} onClick={() => setCreating(true)} />
       </header>
 
       {error && <div className={styles.message}>{error}</div>}
 
-      <Composer status={status} />
+      {tags.length > 0 && (
+        <div className={styles.filterRow} role="group" aria-label="Filter by tag">
+          <button
+            type="button"
+            aria-pressed={activeTag === null}
+            className={`${styles.filterPill} ${activeTag === null ? styles.filterPillActive : ''}`}
+            onClick={() => setTagFilter(null)}
+          >
+            All
+          </button>
+          {tags.map((tag) => (
+            <button
+              key={tag.key}
+              type="button"
+              aria-pressed={activeTag === tag.key}
+              className={`${styles.filterPill} ${activeTag === tag.key ? styles.filterPillActive : ''}`}
+              onClick={() => setTagFilter(activeTag === tag.key ? null : tag.key)}
+            >
+              {tag.label}
+              <span className={styles.filterCount}>{tag.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {coldLoad ? (
         <PoolSkeleton />
-      ) : pool.length > 0 ? (
+      ) : shown.length > 0 ? (
         <div className={styles.grid}>
-          {pool.map((summary) => (
+          {shown.map((summary) => (
             <ProjectCard key={summary.project.id} summary={summary} />
           ))}
         </div>
       ) : (
         !loading && !error && <div className={styles.empty}>{EMPTY_COPY[status]}</div>
       )}
+
+      <NewProjectModal status={status} open={creating} onOpenChange={setCreating} />
     </div>
   );
 }
@@ -205,6 +144,6 @@ export default function PoolPage({ params }: { params: Promise<{ status: string 
     );
   }
 
-  // Keyed so a half-typed composer doesn't follow you to another pool.
+  // Keyed so a half-typed draft or a tag filter doesn't follow you to another pool.
   return <Pool key={status} status={status} />;
 }
