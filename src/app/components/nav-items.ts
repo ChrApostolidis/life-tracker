@@ -7,10 +7,14 @@ import {
   faDiceD20,
   faDumbbell,
   faFilm,
+  faFlagCheckered,
+  faFolderOpen,
   faHouse,
+  faLightbulb,
   faListCheck,
   faNoteSticky,
   faPenNib,
+  faPersonDigging,
   faTableCellsLarge,
   faWallet,
 } from "@fortawesome/free-solid-svg-icons";
@@ -51,6 +55,17 @@ export const navEntries: NavEntry[] = [
       { label: "Year", href: "/year", icon: faTableCellsLarge },
     ],
     alsoMatches: ["/day"],
+  },
+  {
+    label: "Projects",
+    icon: faFolderOpen,
+    items: [
+      { label: "Ideas", href: "/projects/ideas", icon: faLightbulb },
+      { label: "Ongoing", href: "/projects/ongoing", icon: faPersonDigging },
+      { label: "Finished", href: "/projects/finished", icon: faFlagCheckered },
+    ],
+    // A single project (/project/…) keeps the panel open, like /day/… for Calendar.
+    alsoMatches: ["/project"],
   },
   { label: "Habits", href: "/habits", icon: faListCheck },
   { label: "Gym", href: "/gym", icon: faDumbbell },
