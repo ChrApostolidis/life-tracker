@@ -1,9 +1,9 @@
-/* The second exception to the 720px column after Home: four board columns
-   don't fit in it. Overview and Updates cap their own width inside. */
+/* Like the pools, takes 80% of the screen so four board columns have room.
+   Overview and Updates cap their own width inside. */
 .page {
-  max-width: 1240px;
+  width: 80%;
   margin: 0 auto;
-  padding: 48px 32px 80px;
+  padding: 48px 0 80px;
 }
 
 .back {
@@ -102,6 +102,14 @@
 .tabActive:hover {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* ── Tablet: 80% of a narrow main column is too tight ── */
+@media (max-width: 1023px) {
+  .page {
+    width: auto;
+    padding: 48px 32px 80px;
+  }
 }
 
 /* ── Mobile ── */
