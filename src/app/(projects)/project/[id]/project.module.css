@@ -1,0 +1,126 @@
+/* The second exception to the 720px column after Home: four board columns
+   don't fit in it. Overview and Updates cap their own width inside. */
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.back svg {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.back:hover {
+  color: var(--text-secondary);
+}
+
+.crumbSep {
+  color: var(--border);
+}
+
+.crumbName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ── Header ── */
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 40px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.done {
+  color: var(--success);
+}
+
+/* ── Tabs — the capture modal's Task | Note toggle, one size up ── */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tab {
+  min-height: 36px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tabActive,
+.tabActive:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .page {
+    padding: 32px 16px 96px;
+  }
+
+  .title {
+    font-size: 28px;
+    letter-spacing: -0.4px;
+  }
+
+  .tabs {
+    display: flex;
+  }
+
+  .tab {
+    flex: 1;
+    min-height: 44px;
+  }
+}

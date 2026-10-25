@@ -1,0 +1,374 @@
+/* The project page is 1240px wide; the form keeps the standard column. */
+.overview {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--warning);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voiceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voiceError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--mic-active);
+}
+
+.label {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+/* ── Status — the page tabs' segmented look ── */
+.segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.segment {
+  min-height: 36px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.segment:hover {
+  color: var(--text-primary);
+}
+
+.segmentActive,
+.segmentActive:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ── Fields ── */
+.input,
+.textarea {
+  width: 100%;
+  min-height: 44px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus,
+.chipField:focus-within {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--warning);
+}
+
+.input::placeholder,
+.textarea::placeholder,
+.chipInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── Links ── */
+.linkRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linkLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.linkField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linkOpen {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.linkOpen:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.linkOpen svg {
+  width: 14px;
+  height: 14px;
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--warning);
+}
+
+/* ── Tech stack — the Journal composer's tag field ── */
+.chipField {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 44px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+}
+
+.chipRemove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  cursor: pointer;
+}
+
+.chipRemove svg {
+  width: 10px;
+  height: 10px;
+}
+
+.chipInput {
+  flex: 1;
+  min-width: 120px;
+  min-height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  outline: none;
+}
+
+/* ── Timeline ── */
+.dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.dateLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.dateValue {
+  font-size: 14px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+/* ── Progress ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.progressHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.progressPct {
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--success);
+  transition: width 200ms ease;
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stageLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.stageCount {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-primary);
+}
+
+/* ── Delete — the Gym workout page's two-tap button ── */
+.footer {
+  display: flex;
+  padding-top: 8px;
+}
+
+.deleteBtn {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.deleteBtn:hover {
+  color: var(--text-primary);
+}
+
+.deleteBtnArmed,
+.deleteBtnArmed:hover {
+  color: var(--mic-active);
+  border-color: var(--mic-active);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barFill {
+    transition: none;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .segmented {
+    display: flex;
+    align-self: stretch;
+  }
+
+  .segment {
+    flex: 1;
+    min-height: 44px;
+  }
+
+  /* 16px keeps iOS from zooming the viewport on focus. */
+  .input,
+  .textarea,
+  .chipInput {
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .stages {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .deleteBtn {
+    width: 100%;
+  }
+}

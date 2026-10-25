@@ -1,0 +1,221 @@
+/* The project page is 1240px wide; the log keeps the standard column. */
+.updates {
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--warning);
+}
+
+.empty {
+  margin: 0;
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ── Composer ── */
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  /* 16px keeps iOS from zooming the viewport on focus. */
+  font-size: 16px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.textarea:focus,
+.date:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.date {
+  height: 44px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color-scheme: dark;
+}
+
+.saveBtn,
+.ghostBtn {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.saveBtn {
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  transition: opacity 120ms ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ghostBtn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.ghostBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+/* ── Voice ── */
+.voiceError {
+  margin: 0;
+  font-size: 12px;
+  color: var(--mic-active);
+}
+
+/* ── List ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  transition: background-color 120ms ease;
+}
+
+.row:first-child {
+  border-top: none;
+}
+
+button.row {
+  cursor: pointer;
+}
+
+button.row:hover:enabled {
+  background: var(--bg-hover);
+}
+
+button.row:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.rowOpen {
+  gap: 12px;
+  padding: 16px;
+}
+
+.rowDate {
+  font-size: 12px;
+  font-family: var(--font-jetbrains-mono), 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}
+
+.rowBody {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── Delete — the Gym workout page's two-tap button ── */
+.deleteBtn {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.deleteBtn:hover {
+  color: var(--text-primary);
+}
+
+.deleteBtnArmed,
+.deleteBtnArmed:hover {
+  color: var(--mic-active);
+  border-color: var(--mic-active);
+}
+
+/* ── Mobile ── */
+@media (max-width: 767px) {
+  .date {
+    font-size: 16px;
+  }
+
+  .composer {
+    padding: 12px;
+  }
+}
