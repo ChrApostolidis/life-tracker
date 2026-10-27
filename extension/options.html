@@ -29,6 +29,37 @@
     </form>
 
     <section class="block">
+      <p class="eyebrow">Account</p>
+      <form id="login" hidden>
+        <input
+          id="password"
+          class="text-input"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+        />
+        <p class="hint">
+          The Life Tracker password set on the server. It is sent once to start
+          a session, and only that session is kept, never the password.
+        </p>
+        <div class="actions">
+          <button type="submit" class="primary">Log in</button>
+          <p id="login-status" class="status" role="status"></p>
+        </div>
+      </form>
+      <div id="session" hidden>
+        <p class="hint">
+          Logged in. The session lasts 30 days and renews whenever the
+          extension talks to the server.
+        </p>
+        <div class="actions">
+          <button type="button" id="logout" class="primary">Log out</button>
+          <p id="logout-status" class="status" role="status"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
       <p class="eyebrow">Microphone</p>
       <p class="hint">
         Chrome cannot show the microphone prompt inside the popup or the side

@@ -1,3 +1,5 @@
+import { send } from './lib/messages.js';
+
 const form = document.getElementById('settings');
 const input = document.getElementById('api-url');
 const status = document.getElementById('status');
@@ -38,6 +40,56 @@ form.addEventListener('submit', async (event) => {
   await chrome.storage.local.set({ apiUrl: origin });
   input.value = origin; // show what was actually saved
   setStatus(status, 'Saved', 'ok');
+});
+
+// ── Account ─────────────────────────────────────────────────────────────────
+
+const loginForm = document.getElementById('login');
+const password = document.getElementById('password');
+const loginButton = loginForm.querySelector('button');
+const loginStatus = document.getElementById('login-status');
+const session = document.getElementById('session');
+const logoutButton = document.getElementById('logout');
+const logoutStatus = document.getElementById('logout-status');
+
+function showAccount(loggedIn) {
+  loginForm.hidden = loggedIn;
+  session.hidden = !loggedIn;
+}
+
+chrome.storage.local.get('authToken').then(({ authToken }) => showAccount(Boolean(authToken)));
+// Follows the service worker too, which drops the token when the server says 401.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes.authToken) showAccount(Boolean(changes.authToken.newValue));
+});
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!password.value) {
+    setStatus(loginStatus, 'Type the password first', 'error');
+    return;
+  }
+  loginButton.disabled = true;
+  const result = await send('login', { password: password.value });
+  loginButton.disabled = false;
+  if (!result.ok) {
+    setStatus(loginStatus, result.error, 'error');
+    return;
+  }
+  password.value = '';
+  setStatus(loginStatus, '');
+  setStatus(logoutStatus, 'Logged in', 'ok');
+});
+
+logoutButton.addEventListener('click', async () => {
+  logoutButton.disabled = true;
+  const result = await send('logout');
+  logoutButton.disabled = false;
+  if (!result.ok) {
+    setStatus(logoutStatus, `Could not log out: ${result.error}`, 'error');
+    return;
+  }
+  setStatus(logoutStatus, '');
 });
 
 // ── Microphone ──────────────────────────────────────────────────────────────
