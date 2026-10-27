@@ -1,23 +1,28 @@
 // The only module that talks to the backend, and it only runs in the service
-// worker. When auth arrives, it is added in request() and nowhere else.
+// worker. The session token is added in request() and nowhere else.
 
 export class ApiError extends Error {
-  constructor(status, host) {
+  constructor(status, host, retryAfter) {
     super(`${host} said ${status}`);
     this.status = status;
+    // Seconds the server asked us to wait, e.g. after too many login attempts.
+    this.retryAfter = retryAfter;
   }
 }
 export class NetworkError extends Error {}
 export class ConfigError extends Error {}
 
 async function request(path, { method = 'GET', body } = {}) {
-  const { apiUrl } = await chrome.storage.local.get('apiUrl');
+  const { apiUrl, authToken } = await chrome.storage.local.get(['apiUrl', 'authToken']);
   if (!apiUrl) throw new ConfigError();
 
-  const init = { method };
+  // A Bearer header, not a cookie: the session comes from logging in on the
+  // options page, and only that token is stored, never the password.
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  const init = { method, headers };
   if (body !== undefined) {
     init.body = JSON.stringify(body);
-    init.headers = { 'Content-Type': 'application/json' };
+    headers['Content-Type'] = 'application/json';
   }
 
   let res;
@@ -26,14 +31,28 @@ async function request(path, { method = 'GET', body } = {}) {
   } catch {
     throw new NetworkError();
   }
+  // The token expired or was revoked. Dropping it keeps the options page
+  // truthful. A wrong password on login is a 401 too, and must not count.
+  if (res.status === 401 && authToken && !path.startsWith('/api/auth/')) {
+    await chrome.storage.local.remove('authToken');
+  }
   // Name the host: the web app and the API live on similar hostnames, and a
   // 404 from the wrong one is otherwise indistinguishable from a broken API.
-  if (!res.ok) throw new ApiError(res.status, new URL(apiUrl).host);
+  if (!res.ok) {
+    const retryAfter = Number(res.headers.get('Retry-After')) || null;
+    throw new ApiError(res.status, new URL(apiUrl).host, retryAfter);
+  }
   if (res.status === 204) return undefined;
   return res.json();
 }
 
 export const api = {
+  // Answers { token } for the 'extension' client; the web app gets a cookie instead.
+  login: (password) =>
+    request('/api/auth/login', { method: 'POST', body: { password, client: 'extension' } }),
+  // Revokes the session the Bearer header names.
+  logout: () => request('/api/auth/logout', { method: 'POST' }),
+
   // Half-open [from, to), recurring occurrences already expanded server-side.
   listRange: (from, to) =>
     request(`/api/tasks?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
@@ -71,6 +90,17 @@ export function isTransient(e) {
 export function describeError(e) {
   if (e instanceof ConfigError) return 'Set your API URL in options';
   if (e instanceof NetworkError) return 'Could not reach the API';
+  if (e instanceof ApiError && e.status === 401) return 'Not logged in. Log in on the options page';
   if (e instanceof ApiError) return e.message;
   return 'Something went wrong';
+}
+
+// Separate because a wrong password is also a 401, and must not say "log in".
+export function describeLoginError(e) {
+  if (e instanceof ApiError && e.status === 401) return 'Wrong password';
+  if (e instanceof ApiError && e.status === 429) {
+    const minutes = e.retryAfter ? Math.ceil(e.retryAfter / 60) : null;
+    return minutes ? `Too many tries. Try again in ${minutes} min` : 'Too many tries. Try again later';
+  }
+  return describeError(e);
 }

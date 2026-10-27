@@ -2,7 +2,7 @@
 // Chrome's CORS check for the service worker; the backend still checks Origin
 // itself, which is why this extension's ID is pinned in the manifest and listed
 // in app.cors.allowed-origins.
-import { api, describeError } from './lib/api.js';
+import { api, describeError, describeLoginError } from './lib/api.js';
 import { addDays, isSameDay, startOfDay, toDateInput } from './lib/dates.js';
 import { flushQueue, queueStatus, sendOrQueue } from './lib/queue.js';
 
@@ -89,6 +89,24 @@ const handlers = {
   async queueStatus() {
     return { ok: true, ...(await queueStatus()) };
   },
+
+  async login({ password }) {
+    try {
+      const { token } = await api.login(password);
+      await chrome.storage.local.set({ authToken: token });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: describeLoginError(e) };
+    }
+  },
+
+  // The token is dropped only once the server has revoked it: dropping it on a
+  // failed call would look logged out while the session stays live for 30 days.
+  async logout() {
+    await api.logout();
+    await chrome.storage.local.remove('authToken');
+    return { ok: true };
+  },
 };
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -116,9 +134,10 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
   if (name === BADGE_ALARM) refreshBadge();
 });
 
-// A new backend address is the moment a queued backlog can finally go out.
+// A new backend address or a fresh login is the moment a queued backlog can
+// finally go out. A cleared token refreshes too, so the badge clears.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.apiUrl) start();
+  if (area === 'local' && (changes.apiUrl || changes.authToken)) start();
 });
 
 chrome.commands.onCommand.addListener((command, tab) => {
