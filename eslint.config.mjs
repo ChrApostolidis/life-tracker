@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The MCP server has its own package and strict tsc check.
+    "mcp/**",
   ]),
 ]);
 
