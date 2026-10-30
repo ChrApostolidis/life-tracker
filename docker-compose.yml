@@ -9,3 +9,21 @@ services:
       - "3000:3000"
     env_file:
       - .env
+
+  # Hosted MCP server for claude.ai and the phone (mcp/, issues/MCP_PHASE_2.md).
+  # Host networking so it reaches the API at 127.0.0.1:8080 and binds 127.0.0.1:3100
+  # only; the Cloudflare tunnel is the one way in from outside.
+  mcp:
+    build: ./mcp
+    restart: always
+    network_mode: host
+    environment:
+      LT_API_URL: http://127.0.0.1:8080
+      LT_PRODUCTION: "true"
+      LT_TIMEZONE: Europe/Athens
+      MCP_PUBLIC_URL: https://mcp.christosapostolidis.com
+    volumes:
+      - life-tracker-mcp-data:/data
+
+volumes:
+  life-tracker-mcp-data:
