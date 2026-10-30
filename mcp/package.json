@@ -15,6 +15,7 @@
     "status": "node dist/cli.js status"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.5",
     "@modelcontextprotocol/server": "^2.4.0",
     "zod": "^4.6.7"
   },
