@@ -25,5 +25,6 @@ jobs:
             set -e
             cd ~/life-tracker/life-tracker-app
             git pull
-            docker compose down
-            docker compose up -d --build
+            # Build first: a failed build leaves the running containers serving.
+            docker compose build
+            docker compose up -d
