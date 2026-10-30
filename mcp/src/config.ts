@@ -24,7 +24,8 @@ function checkTimezone(zone: string): string {
 
 export const apiOrigin = toOrigin(process.env.LT_API_URL?.trim() || DEFAULT_API_URL);
 export const apiHost = new URL(apiOrigin).host;
-export const isProduction = apiOrigin === toOrigin(DEFAULT_API_URL);
+// LT_PRODUCTION covers production reached another way, e.g. 127.0.0.1:8080 on the server.
+export const isProduction = apiOrigin === toOrigin(DEFAULT_API_URL) || process.env.LT_PRODUCTION === 'true';
 
 // Set before any Date work so "today" and local midnight match the backend's
 // app.timezone, also on a UTC container. An unknown TZ would silently mean UTC.
@@ -32,6 +33,11 @@ export const timezone = checkTimezone(process.env.LT_TIMEZONE?.trim() || DEFAULT
 process.env.TZ = timezone;
 
 export const dataDir =
-  process.platform === 'win32'
+  process.env.LT_DATA_DIR?.trim() ||
+  (process.platform === 'win32'
     ? join(process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'), 'life-tracker-mcp')
-    : join(homedir(), '.config', 'life-tracker-mcp');
+    : join(homedir(), '.config', 'life-tracker-mcp'));
+
+// Set once by http.ts. The hosted server logs in through OAuth and keeps no
+// offline queue: if the box is down, it is down too.
+export const runtime = { hosted: false };

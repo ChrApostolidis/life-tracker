@@ -3,7 +3,7 @@
 
 import { join } from 'node:path';
 import { api, describeError, isTransient } from './api.ts';
-import { apiOrigin, dataDir } from './config.ts';
+import { apiOrigin, dataDir, runtime } from './config.ts';
 import { createQueue, type QueueKind } from './queue.ts';
 import type {
   JournalEntryInput,
@@ -59,6 +59,7 @@ export async function createOrQueue<K extends QueueKind, R>(
   summary: string,
   confirm: (created: R) => string,
 ): Promise<string> {
+  if (runtime.hosted) return confirm((await changeNow(() => send(kind, payload))) as R);
   const result = await queue.sendOrQueue(kind, payload);
   if (!result.ok) throw new Error(result.error);
   if (result.queued) return `${QUEUED_MESSAGE}\nNot saved yet: ${summary}`;
@@ -90,6 +91,7 @@ export async function lookupForCreate<T>(fn: () => Promise<T>): Promise<T> {
 
 // Logged, never thrown: a failed flush must not fail an unrelated tool call.
 export async function flushQueue(): Promise<void> {
+  if (runtime.hosted) return;
   try {
     await queue.flush();
   } catch (e) {
@@ -98,6 +100,7 @@ export async function flushQueue(): Promise<void> {
 }
 
 export async function queueStatusLine(): Promise<string> {
+  if (runtime.hosted) return 'Queue: none on the hosted server';
   try {
     const { count, lastError } = await queue.status();
     return `Queue: ${count} waiting${lastError ? ` (last error: ${lastError})` : ''}`;

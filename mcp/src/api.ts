@@ -1,9 +1,10 @@
 // The only module that talks to the backend. The Bearer token is added in
 // request() and nowhere else.
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { apiHost, apiOrigin, dataDir } from './config.ts';
+import { apiHost, apiOrigin, dataDir, runtime } from './config.ts';
 import type {
   DayNote,
   DayNoteInput,
@@ -65,7 +66,17 @@ async function readTokens(): Promise<Record<string, string>> {
   }
 }
 
+// On the hosted server each request carries its own backend token, found
+// from the connector's OAuth token, and there is no token file.
+export type BackendSession = { token: string; onRejected: () => Promise<void> };
+const sessions = new AsyncLocalStorage<BackendSession>();
+
+export function withBackendSession<T>(session: BackendSession, fn: () => T): T {
+  return sessions.run(session, fn);
+}
+
 export async function getToken(): Promise<string | null> {
+  if (runtime.hosted) return sessions.getStore()?.token ?? null;
   return (await readTokens())[apiOrigin] ?? null;
 }
 
@@ -77,12 +88,16 @@ export async function setToken(token: string | null): Promise<void> {
   await writeFile(TOKENS_FILE, JSON.stringify(tokens, null, 2), { mode: 0o600 });
 }
 
-type RequestOptions = { method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; body?: unknown };
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  body?: unknown;
+  headers?: Record<string, string>;
+};
 
-async function request<T>(path: string, { method = 'GET', body }: RequestOptions = {}): Promise<T> {
+async function request<T>(path: string, { method = 'GET', body, headers: extra }: RequestOptions = {}): Promise<T> {
   const token = await getToken();
   // No token, no header: that works while the backend is not enforcing auth.
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const headers: Record<string, string> = { ...extra, ...(token ? { Authorization: `Bearer ${token}` } : {}) };
   const init: RequestInit = { method, headers, signal: AbortSignal.timeout(TIMEOUT_MS) };
   if (body !== undefined) {
     init.body = JSON.stringify(body);
@@ -98,7 +113,9 @@ async function request<T>(path: string, { method = 'GET', body }: RequestOptions
   // The token expired or was revoked. A wrong password on login is a 401 too,
   // and must not count.
   if (res.status === 401 && token && !path.startsWith('/api/auth/')) {
-    await setToken(null);
+    const session = sessions.getStore();
+    if (session) await session.onRejected();
+    else await setToken(null);
   }
   if (!res.ok) {
     const retryAfter = Number(res.headers.get('Retry-After')) || null;
@@ -122,10 +139,13 @@ const q = encodeURIComponent;
 
 export const api = {
   // Answers { token } for every client but 'web', which gets a cookie instead.
-  login: (password: string) =>
+  // The hosted login page passes the browser's IP: the backend's lockout is
+  // keyed on CF-Connecting-IP, and without it every attempt shares one bucket.
+  login: (password: string, clientIp?: string) =>
     request<{ token?: string } | undefined>('/api/auth/login', {
       method: 'POST',
       body: { password, client: 'mcp' },
+      headers: clientIp ? { 'CF-Connecting-IP': clientIp } : undefined,
     }),
   // Revokes the session the Bearer header names.
   logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
@@ -218,9 +238,14 @@ export function isTransient(e: unknown): boolean {
   return e instanceof NetworkError || (e instanceof ApiError && e.status >= 500);
 }
 
+// What to do about a 401, which differs between the two entries.
+export function loginHint(): string {
+  return runtime.hosted ? "Reconnect the connector in Claude's settings." : 'Run: node mcp/dist/cli.js login';
+}
+
 export function describeError(e: unknown): string {
   if (e instanceof NetworkError) return `Life Tracker server is unreachable (${apiHost})`;
-  if (e instanceof ApiError && e.status === 401) return 'Not logged in. Run: node mcp/dist/cli.js login';
+  if (e instanceof ApiError && e.status === 401) return `Not logged in. ${loginHint()}`;
   if (e instanceof ApiError && e.status >= 500) {
     return `Life Tracker server is unavailable (${apiHost} said ${e.status})`;
   }
