@@ -14,6 +14,7 @@ This is the **frontend** (Next.js). The API and persistence layer lives in a sep
 - [Design principles](#design-principles)
 - [Features](#features)
 - [Chrome extension](#chrome-extension)
+- [MCP server](#mcp-server)
 - [Demos](#demos)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
@@ -111,6 +112,37 @@ Two decisions worth knowing:
 
 - **Every network call happens in the service worker**, where a host permission lifts Chrome's own CORS check. The backend still checks the `Origin` header itself, though, so the extension's origin is on the API's allow-list. Its ID is pinned by a public key in the manifest, so that entry keeps matching wherever the folder lives on disk.
 - **The backend address is entered on the options page**, stored in the browser, and never committed. Saving it asks Chrome for permission to call that one host, so the extension holds no blanket access to every site you visit.
+- **You log in on the options page too.** The password is sent once and only the session token the API answers with is kept, sent as a Bearer header on every call. When the session runs out, a capture keeps its text with a link to log in, and anything already waiting in the offline queue goes out the moment you do.
+
+---
+
+## MCP server
+
+`mcp/` is a small [Model Context Protocol](https://modelcontextprotocol.io) server that lets Claude (Claude Code, Claude Desktop, claude.ai and the phone app) use the tracker through typed tools: "what's on today", "plan tomorrow", "add this to the Life Tracker board" in the middle of a coding session, or a weekly review across tasks, habits, sleep, gym, journal and money.
+
+- **25 tools**: 13 that read (one `get_day` answers "how's today" in a single call) and 12 that write. There are no delete tools. Projects, habits and exercises are named, not addressed by id, and a name that doesn't match exactly one thing comes back as a list of candidates rather than a guess.
+- **4 prompts**: `plan-tomorrow`, `weekly-review`, `inbox-triage`, `evening-journal`. Each one proposes changes as a list and waits for a yes before writing anything.
+- **One database.** The server is just another API client, like the extension. It always talks to the real backend; a local dev API is an explicit setting, and every answer from one is marked `[dev: …]`.
+- **Works while the server is off**: new tasks, journal entries, notes, expenses, board items and project updates wait on disk and go out on the next call once the API is back. Ticks, edits and moves are never queued, since replayed later they could undo a change made in the app meanwhile.
+
+Setup, once:
+
+```bash
+cd mcp && npm install && npm run build
+npm run login
+claude mcp add --scope user life-tracker -- node <repo>/mcp/dist/index.js
+```
+
+Claude starts it on its own from then on. `npm run login` asks for the password once and keeps only the session token.
+
+### Hosted, for claude.ai and the phone
+
+claude.ai and the phone app run on Anthropic's servers, so they can't start a program on a PC. The same tools also run as an always-on container on the home server, reached through the Cloudflare tunnel over Streamable HTTP. It's added once as a custom connector, using the server's `/mcp` URL.
+
+- **Its own small OAuth server.** Connectors log in over OAuth 2.1, and with a single user there's no need for an identity provider. Claude registers itself, then opens a password page that looks like the web app's login.
+- **The password is never stored.** The page sends it to the API, which answers with a session. The MCP server issues its own short-lived tokens and keeps only their hashes, each mapped to that session.
+- **Locked down by default.** Only Anthropic's callback addresses can register, PKCE is required, login codes are single-use and expire in 60 seconds, and refresh tokens rotate on every use. Without a token, `/mcp` answers `401`. If the API ends the session, the connector has to log in again.
+- **No offline queue here.** If the home server is down, the hosted server is down with it, and Claude shows an error. The local server above keeps its queue, so both can run side by side against the same database.
 
 ---
 
@@ -153,4 +185,5 @@ src/
   lib/            api.ts (REST client), types.ts, date.ts, game.ts (RPG engine),
                   and one *-context.tsx per feature domain (optimistic state + rollback)
 extension/        Manifest V3 Chrome extension (quick capture + side panel), loaded unpacked
+mcp/              MCP server so Claude can read and write the tracker (local stdio and hosted HTTP, own package.json)
 ```
